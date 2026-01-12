@@ -1,0 +1,739 @@
+[
+  {
+    "id": "test_1735556400000_math01",
+    "title": "Temel Matematik - Dört İşlem",
+    "description": "Toplama, çıkarma, çarpma ve bölme işlemlerini içeren temel matematik testi",
+    "category": "Matematik",
+    "timePerQuestion": 30,
+    "questions": [
+      {
+        "id": 1001,
+        "type": "multiple",
+        "questionText": "15 + 27 işleminin sonucu kaçtır?",
+        "options": [
+          "40",
+          "42",
+          "44",
+          "46"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 1002,
+        "type": "multiple",
+        "questionText": "8 × 7 işleminin sonucu kaçtır?",
+        "options": [
+          "54",
+          "56",
+          "58",
+          "60"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 1003,
+        "type": "multiple",
+        "questionText": "144 ÷ 12 işleminin sonucu kaçtır?",
+        "options": [
+          "10",
+          "11",
+          "12",
+          "13"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 1004,
+        "type": "truefalse",
+        "questionText": "5 × 5 = 25 doğru bir eşitliktir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 1005,
+        "type": "fillblank",
+        "questionText": "100 - 37 = ?",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "63"
+        ],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:00:00.000Z",
+    "playCount": 9,
+    "statistics": {
+      "totalPlays": 9,
+      "totalStudents": 11,
+      "averageScore": 9.630370370370372,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400001_turkish01",
+    "title": "Türkçe - Sözcük Türleri",
+    "description": "İsim, fiil, sıfat ve zarf konularını kapsayan Türkçe testi",
+    "category": "Türkçe",
+    "timePerQuestion": 25,
+    "questions": [
+      {
+        "id": 2001,
+        "type": "multiple",
+        "questionText": "Aşağıdaki cümledeki altı çizili sözcük hangi türdedir? 'Hızlı koşan atı gördüm.'",
+        "options": [
+          "İsim",
+          "Fiil",
+          "Sıfat",
+          "Zarf"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2002,
+        "type": "truefalse",
+        "questionText": "'Ev' kelimesi bir isimdir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2003,
+        "type": "multiple",
+        "questionText": "'Yavaşça' sözcüğü hangi türdedir?",
+        "options": [
+          "İsim",
+          "Fiil",
+          "Sıfat",
+          "Zarf"
+        ],
+        "correctAnswer": 3,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2004,
+        "type": "fillblank",
+        "questionText": "Hareket bildiren sözcüklere ... denir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "fiil",
+          "eylem"
+        ],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:05:00.000Z",
+    "playCount": 1,
+    "statistics": {
+      "totalPlays": 1,
+      "totalStudents": 2,
+      "averageScore": 21.75,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400002_science01",
+    "title": "Fen Bilimleri - Madde ve Özellikleri",
+    "description": "Maddenin halleri ve özellikleri konusunu kapsayan fen bilimleri testi",
+    "category": "Fen Bilimleri",
+    "timePerQuestion": 35,
+    "questions": [
+      {
+        "id": 3001,
+        "type": "multiple",
+        "questionText": "Maddenin kaç hali vardır?",
+        "options": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 3002,
+        "type": "truefalse",
+        "questionText": "Su 100°C'de kaynar.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 3003,
+        "type": "multiple",
+        "questionText": "Aşağıdakilerden hangisi gaz halindeki bir maddedir?",
+        "options": [
+          "Su",
+          "Demir",
+          "Oksijen",
+          "Tuz"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 3004,
+        "type": "fillblank",
+        "questionText": "Maddenin sıvıdan gaza dönüşmesine ... denir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "buharlaşma",
+          "buharlaşma"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 3005,
+        "type": "truefalse",
+        "questionText": "Katı maddeler belirli bir şekle sahiptir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:10:00.000Z",
+    "playCount": 1,
+    "statistics": {
+      "totalPlays": 1,
+      "totalStudents": 2,
+      "averageScore": 17.72,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400003_social01",
+    "title": "Sosyal Bilgiler - Türkiye Coğrafyası",
+    "description": "Türkiye'nin coğrafi özellikleri ve bölgeleri hakkında test",
+    "category": "Sosyal Bilgiler",
+    "timePerQuestion": 30,
+    "questions": [
+      {
+        "id": 4001,
+        "type": "multiple",
+        "questionText": "Türkiye'nin başkenti neresidir?",
+        "options": [
+          "İstanbul",
+          "Ankara",
+          "İzmir",
+          "Bursa"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 4002,
+        "type": "multiple",
+        "questionText": "Türkiye kaç coğrafi bölgeye ayrılır?",
+        "options": [
+          "5",
+          "6",
+          "7",
+          "8"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 4003,
+        "type": "truefalse",
+        "questionText": "Karadeniz Bölgesi Türkiye'nin kuzeyinde yer alır.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 4004,
+        "type": "fillblank",
+        "questionText": "Türkiye'nin en uzun nehri ... 'dır.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "Kızılırmak",
+          "kızılırmak"
+        ],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:15:00.000Z",
+    "playCount": 0,
+    "statistics": {
+      "totalPlays": 0,
+      "totalStudents": 0,
+      "averageScore": 0,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400004_english01",
+    "title": "İngilizce - Temel Kelimeler",
+    "description": "Günlük hayatta kullanılan temel İngilizce kelimeler testi",
+    "category": "İngilizce",
+    "timePerQuestion": 20,
+    "questions": [
+      {
+        "id": 5001,
+        "type": "multiple",
+        "questionText": "'Merhaba' İngilizce'de nasıl söylenir?",
+        "options": [
+          "Goodbye",
+          "Hello",
+          "Thanks",
+          "Please"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 5002,
+        "type": "multiple",
+        "questionText": "'Book' kelimesinin Türkçe karşılığı nedir?",
+        "options": [
+          "Defter",
+          "Kitap",
+          "Kalem",
+          "Silgi"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 5003,
+        "type": "truefalse",
+        "questionText": "'Apple' elma demektir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 5004,
+        "type": "fillblank",
+        "questionText": "'Kedi' İngilizce'de ... denir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "cat",
+          "Cat"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 5005,
+        "type": "multiple",
+        "questionText": "Aşağıdakilerden hangisi bir renktir?",
+        "options": [
+          "Dog",
+          "Red",
+          "Water",
+          "Table"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:20:00.000Z",
+    "playCount": 1,
+    "statistics": {
+      "totalPlays": 1,
+      "totalStudents": 1,
+      "averageScore": 68.5,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400005_math02",
+    "title": "Matematik - Kesirler",
+    "description": "Basit kesirler ve kesirlerle işlemler konusu",
+    "category": "Matematik",
+    "timePerQuestion": 40,
+    "questions": [
+      {
+        "id": 6001,
+        "type": "multiple",
+        "questionText": "1/2 + 1/4 işleminin sonucu nedir?",
+        "options": [
+          "1/4",
+          "2/4",
+          "3/4",
+          "4/4"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 6002,
+        "type": "truefalse",
+        "questionText": "1/2 kesri 0.5'e eşittir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 6003,
+        "type": "multiple",
+        "questionText": "Aşağıdakilerden hangisi en büyük kesirdir?",
+        "options": [
+          "1/4",
+          "1/3",
+          "1/2",
+          "1/5"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 6004,
+        "type": "fillblank",
+        "questionText": "Bir bütünün yarısı ... kesri ile gösterilir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "1/2",
+          "bir bölü iki"
+        ],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:25:00.000Z",
+    "playCount": 0,
+    "statistics": {
+      "totalPlays": 0,
+      "totalStudents": 0,
+      "averageScore": 0,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400006_science02",
+    "title": "Fen Bilimleri - Canlılar ve Yaşam",
+    "description": "Canlıların özellikleri ve sınıflandırılması konusu",
+    "category": "Fen Bilimleri",
+    "timePerQuestion": 30,
+    "questions": [
+      {
+        "id": 7001,
+        "type": "multiple",
+        "questionText": "Aşağıdakilerden hangisi canlıların ortak özelliğidir?",
+        "options": [
+          "Uçmak",
+          "Beslenme",
+          "Yüzmek",
+          "Koşmak"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 7002,
+        "type": "truefalse",
+        "questionText": "Bitkiler de canlıdır.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 7003,
+        "type": "multiple",
+        "questionText": "Fotosentez hangi canlılar tarafından yapılır?",
+        "options": [
+          "Hayvanlar",
+          "Bitkiler",
+          "Mantarlar",
+          "Bakteriler"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 7004,
+        "type": "fillblank",
+        "questionText": "Canlıların soyunun devam etmesine ... denir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "üreme",
+          "çoğalma"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 7005,
+        "type": "truefalse",
+        "questionText": "İnsan bir omurgalı hayvandır.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:30:00.000Z",
+    "playCount": 0,
+    "statistics": {
+      "totalPlays": 0,
+      "totalStudents": 0,
+      "averageScore": 0,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400007_turkish02",
+    "title": "Türkçe - Yazım Kuralları",
+    "description": "Türkçe yazım kuralları ve noktalama işaretleri",
+    "category": "Türkçe",
+    "timePerQuestion": 25,
+    "questions": [
+      {
+        "id": 8001,
+        "type": "truefalse",
+        "questionText": "Cümle sonunda nokta kullanılır.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 8002,
+        "type": "multiple",
+        "questionText": "Aşağıdakilerden hangisi doğru yazılmıştır?",
+        "options": [
+          "oglum",
+          "oğlum",
+          "ogulum",
+          "ogluum"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 8003,
+        "type": "fillblank",
+        "questionText": "Özel isimler ... harfle başlar.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "büyük",
+          "buyuk"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 8004,
+        "type": "multiple",
+        "questionText": "Soru cümlelerinin sonunda hangi işaret kullanılır?",
+        "options": [
+          ".",
+          ",",
+          "?",
+          "!"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:35:00.000Z",
+    "playCount": 1,
+    "statistics": {
+      "totalPlays": 1,
+      "totalStudents": 2,
+      "averageScore": 11.75,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400008_math03",
+    "title": "Matematik - Geometri Temelleri",
+    "description": "Temel geometrik şekiller ve özellikleri",
+    "category": "Matematik",
+    "timePerQuestion": 35,
+    "questions": [
+      {
+        "id": 9001,
+        "type": "multiple",
+        "questionText": "Kaç kenarı olan şekle üçgen denir?",
+        "options": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 9002,
+        "type": "truefalse",
+        "questionText": "Karenin tüm kenarları eşittir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 9003,
+        "type": "multiple",
+        "questionText": "Dairenin çevresi hangi formülle bulunur?",
+        "options": [
+          "2πr",
+          "πr²",
+          "4πr",
+          "2r"
+        ],
+        "correctAnswer": 0,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 9004,
+        "type": "fillblank",
+        "questionText": "Dört kenarı eşit olan dörtgene ... denir.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "kare",
+          "eşkenar dörtgen"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 9005,
+        "type": "truefalse",
+        "questionText": "Dikdörtgenin karşılıklı kenarları eşittir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:40:00.000Z",
+    "playCount": 2,
+    "statistics": {
+      "totalPlays": 2,
+      "totalStudents": 3,
+      "averageScore": 51.154999999999994,
+      "completionRate": 0
+    }
+  },
+  {
+    "id": "test_1735556400009_general01",
+    "title": "Genel Kültür - Karma Test",
+    "description": "Çeşitli konulardan oluşan genel kültür testi",
+    "category": "Diğer",
+    "timePerQuestion": 30,
+    "questions": [
+      {
+        "id": 10001,
+        "type": "multiple",
+        "questionText": "Türkiye Cumhuriyeti hangi yıl kurulmuştur?",
+        "options": [
+          "1920",
+          "1921",
+          "1922",
+          "1923"
+        ],
+        "correctAnswer": 3,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 10002,
+        "type": "truefalse",
+        "questionText": "Dünya'nın en büyük okyanusu Pasifik Okyanusu'dur.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 10003,
+        "type": "multiple",
+        "questionText": "Hangi gezegen Güneş Sistemi'nin en büyüğüdür?",
+        "options": [
+          "Mars",
+          "Satürn",
+          "Jüpiter",
+          "Uranüs"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 10004,
+        "type": "fillblank",
+        "questionText": "Bir yılda ... ay vardır.",
+        "options": [],
+        "correctAnswer": 0,
+        "correctAnswers": [
+          "12",
+          "on iki"
+        ],
+        "pairs": []
+      },
+      {
+        "id": 10005,
+        "type": "truefalse",
+        "questionText": "İstanbul Türkiye'nin en kalabalık şehridir.",
+        "options": [],
+        "correctAnswer": true,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 10006,
+        "type": "multiple",
+        "questionText": "Olimpiyat Oyunları kaç yılda bir düzenlenir?",
+        "options": [
+          "2",
+          "3",
+          "4",
+          "5"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ],
+    "createdAt": "2025-12-30T00:45:00.000Z",
+    "playCount": 0,
+    "statistics": {
+      "totalPlays": 0,
+      "totalStudents": 0,
+      "averageScore": 0,
+      "completionRate": 0
+    }
+  }
+]

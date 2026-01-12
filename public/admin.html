@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Admin Paneli</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        .card {
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-number {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #007bff;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-cog fa-spin me-2"></i>Admin Paneli
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="userName">Yükleniyor...</span>
+                </span>
+                <a href="/create-test" class="btn btn-outline-light me-2">
+                    <i class="fas fa-plus-circle"></i> Yeni Test
+                </a>
+                <a href="/teacher" class="btn btn-outline-light me-2">
+                    <i class="fas fa-chalkboard-teacher"></i> Öğretmen Paneli
+                </a>
+                <a href="/" class="btn btn-outline-light me-2">
+                    <i class="fas fa-home"></i> Ana Sayfa
+                </a>
+                <button onclick="logout()" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Test İstatistikleri -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clipboard-list fa-3x mb-2"></i>
+                        <h3 id="totalTests">0</h3>
+                        <p class="mb-0">Toplam Test</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-play-circle fa-3x mb-2"></i>
+                        <h3 id="totalPlays">0</h3>
+                        <p class="mb-0">Toplam Oynatma</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-3x mb-2"></i>
+                        <h3 id="totalStudents">0</h3>
+                        <p class="mb-0">Toplam Öğrenci</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <i class="fas fa-chart-line fa-3x mb-2"></i>
+                        <h3 id="avgScore">0%</h3>
+                        <p class="mb-0">Ortalama Başarı</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Testler Listesi -->
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Tüm Testler
+                </h5>
+                <button class="btn btn-light btn-sm" onclick="loadTests()">
+                    <i class="fas fa-sync"></i> Yenile
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- Arama ve Filtreleme -->
+                <div class="row mb-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <i class="fas fa-search"></i>
+                            </span>
+                            <input type="text" class="form-control" id="testSearch"
+                                placeholder="Test adına göre ara...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select class="form-select" id="categoryFilter">
+                            <option value="">Tüm Kategoriler</option>
+                            <option value="Matematik">Matematik</option>
+                            <option value="Türkçe">Türkçe</option>
+                            <option value="Fen Bilimleri">Fen Bilimleri</option>
+                            <option value="Sosyal Bilgiler">Sosyal Bilgiler</option>
+                            <option value="İngilizce">İngilizce</option>
+                            <option value="Diğer">Diğer</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="testsList">
+                    <div class="text-center py-5">
+                        <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                        <p>Testler yükleniyor...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test Detay Modal -->
+    <div class="modal fade" id="testDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-info-circle"></i> Test Detayları
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="testDetailContent">
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Giriş kontrolü
+        (function checkAuth() {
+            const token = localStorage.getItem('teacherToken');
+            const teacherName = localStorage.getItem('teacherName');
+
+            if (!token || !teacherName) {
+                alert('⚠️ Admin paneline erişmek için önce giriş yapmalısınız!');
+                window.location.href = '/login';
+                return;
+            }
+
+            // Kullanıcı adını göster
+            document.getElementById('userName').textContent = teacherName;
+        })();
+
+        // Çıkış fonksiyonu
+        function logout() {
+            if (confirm('Çıkış yapmak istediğinize emin misiniz?')) {
+                localStorage.removeItem('teacherToken');
+                localStorage.removeItem('teacherName');
+                localStorage.removeItem('teacherUsername');
+                window.location.href = '/login';
+            }
+        }
+
+        let allTests = []; // Tüm testleri sakla
+
+        // Test listesini yükle
+        async function loadTests() {
+            try {
+                const response = await fetch('/api/tests');
+                const tests = await response.json();
+
+                allTests = tests; // Global değişkene kaydet
+                displayStatistics(tests);
+                displayTests(tests);
+            } catch (error) {
+                console.error('Testler yüklenirken hata:', error);
+            }
+        }
+
+        // Arama ve filtreleme event listener'ları
+        document.addEventListener('DOMContentLoaded', () => {
+            const searchInput = document.getElementById('testSearch');
+            const categoryFilter = document.getElementById('categoryFilter');
+
+            searchInput.addEventListener('input', filterTests);
+            categoryFilter.addEventListener('change', filterTests);
+
+            loadTests();
+        });
+
+        // Testleri filtrele
+        function filterTests() {
+            const searchTerm = document.getElementById('testSearch').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            const filtered = allTests.filter(test => {
+                const matchesSearch = test.title.toLowerCase().includes(searchTerm) ||
+                    (test.description && test.description.toLowerCase().includes(searchTerm));
+                const matchesCategory = !category || test.category === category;
+
+                return matchesSearch && matchesCategory;
+            });
+
+            displayTests(filtered);
+        }
+
+        function displayStatistics(tests) {
+            document.getElementById('totalTests').textContent = tests.length;
+
+            const totalPlays = tests.reduce((sum, t) => sum + (t.playCount || 0), 0);
+            document.getElementById('totalPlays').textContent = totalPlays;
+
+            const totalStudents = tests.reduce((sum, t) => sum + (t.statistics?.totalStudents || 0), 0);
+            document.getElementById('totalStudents').textContent = totalStudents;
+
+            const avgScore = tests.length > 0
+                ? (tests.reduce((sum, t) => sum + (t.statistics?.averageScore || 0), 0) / tests.length).toFixed(1)
+                : 0;
+            document.getElementById('avgScore').textContent = avgScore + '%';
+        }
+
+        function displayTests(tests) {
+            const listEl = document.getElementById('testsList');
+
+            if (tests.length === 0) {
+                listEl.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-folder-open fa-4x mb-3"></i>
+                        <p>Henüz test oluşturulmamış</p>
+                        <a href="/create-test" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> İlk Testi Oluştur
+                        </a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="table-responsive"><table class="table table-hover">';
+            html += `
+                <thead class="table-light">
+                    <tr>
+                        <th>Test Adı</th>
+                        <th>Kategori</th>
+                        <th>Sorular</th>
+                        <th>Oynatma</th>
+                        <th>Ort. Başarı</th>
+                        <th>İşlemler</th>
+                    </tr>
+                </thead>
+                <tbody>
+            `;
+
+            tests.forEach(test => {
+                html += `
+                    <tr>
+                        <td><strong>${test.title}</strong></td>
+                        <td><span class="badge bg-info">${test.category}</span></td>
+                        <td>${test.questions.length} soru</td>
+                        <td><span class="badge bg-success">${test.playCount || 0}</span></td>
+                        <td>${(test.statistics?.averageScore || 0).toFixed(1)}%</td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick='showTestDetail(${JSON.stringify(test).replace(/'/g, "&apos;")})'>
+                                <i class="fas fa-eye"></i> Detay
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteTest('${test.id}', '${test.title}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table></div>';
+            listEl.innerHTML = html;
+        }
+
+        function showTestDetail(test) {
+            const content = document.getElementById('testDetailContent');
+
+            let html = `
+                <div class="mb-3">
+                    <h5>${test.title}</h5>
+                    <p class="text-muted">${test.description || 'Açıklama yok'}</p>
+                </div>
+                
+                <div class="row mb-4">
+                    <div class="col-md-6">
+                        <p><strong>Kategori:</strong> ${test.category}</p>
+                        <p><strong>Soru Sayısı:</strong> ${test.questions.length}</p>
+                        <p><strong>Soru Başına Süre:</strong> ${test.timePerQuestion} saniye</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Oynatma Sayısı:</strong> ${test.playCount || 0}</p>
+                        <p><strong>Toplam Öğrenci:</strong> ${test.statistics?.totalStudents || 0}</p>
+                        <p><strong>Ortalama Başarı:</strong> ${(test.statistics?.averageScore || 0).toFixed(1)}%</p>
+                    </div>
+                </div>
+                
+                <h6 class="mb-3">Sorular:</h6>
+                <div class="accordion" id="questionsAccordion">
+            `;
+
+            test.questions.forEach((q, index) => {
+                html += `
+                    <div class="accordion-item">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#q${index}">
+                                ${index + 1}. ${q.questionText}
+                            </button>
+                        </h2>
+                        <div id="q${index}" class="accordion-collapse collapse" data-bs-parent="#questionsAccordion">
+                            <div class="accordion-body">
+                                <p><strong>Tip:</strong> ${getQuestionTypeName(q.type)}</p>
+                `;
+
+                if (q.type === 'multiple') {
+                    html += '<strong>Seçenekler:</strong><ul>';
+                    q.options.forEach((opt, i) => {
+                        html += `<li ${i === q.correctAnswer ? 'class="text-success fw-bold"' : ''}>${opt}</li>`;
+                    });
+                    html += '</ul>';
+                } else if (q.type === 'truefalse') {
+                    html += `<p><strong>Doğru Cevap:</strong> ${q.correctAnswer ? 'Doğru' : 'Yanlış'}</p>`;
+                } else if (q.type === 'fillblank') {
+                    html += `<p><strong>Kabul Edilen Cevaplar:</strong> ${q.correctAnswers.join(', ')}</p>`;
+                }
+
+                html += '</div></div></div>';
+            });
+
+            html += '</div>';
+            content.innerHTML = html;
+
+            new bootstrap.Modal(document.getElementById('testDetailModal')).show();
+        }
+
+        function getQuestionTypeName(type) {
+            const types = {
+                'multiple': 'Çoktan Seçmeli',
+                'truefalse': 'Doğru/Yanlış',
+                'fillblank': 'Boşluk Doldurma',
+                'matching': 'Eşleştirme'
+            };
+            return types[type] || type;
+        }
+
+        async function deleteTest(id, title) {
+            if (!confirm(`"${title}" testini silmek istediğinize emin misiniz?`)) return;
+
+            try {
+                const response = await fetch(`/api/tests/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    alert('Test silindi!');
+                    loadTests();
+                } else {
+                    alert('Silme işlemi başarısız!');
+                }
+            } catch (error) {
+                alert('Hata oluştu: ' + error.message);
+            }
+        }
+    </script>
+</body>
+
+</html>

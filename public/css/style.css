@@ -1,0 +1,128 @@
+body {
+  background-color: #f8f9fa;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.btn-gradient {
+  background: linear-gradient(to right, #007bff, #6610f2);
+  color: white;
+  border: none;
+  transition: all 0.3s ease;
+}
+
+.btn-gradient:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+  color: white;
+}
+
+.quiz_box {
+  display: none;
+}
+
+.score_box {
+  display: none;
+}
+
+.btn_start {
+  display: block;
+}
+
+.bg-gradient {
+  background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+}
+
+.time_line {
+  height: 3px;
+  background: #f8f9fa;
+  width: 100%;
+}
+
+.option {
+  padding: 10px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.option.selected {
+  background-color: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.option:hover {
+  background: #f8f9fa;
+}
+
+.option.correct {
+  background: #28a745;
+  color: white;
+}
+
+.option.incorrect {
+  background: #dc3545;
+  color: white;
+}
+
+.option.disabled {
+  pointer-events: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.score_box .icon {
+  animation: crown 1s ease infinite;
+}
+
+@keyframes crown {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+/* Quiz box görünürlüğü için */
+.quiz_box.active {
+  display: block !important;
+}
+
+.card-header .title {
+  color: #212529;
+}
+
+.time_second {
+  font-weight: bold;
+  min-width: 30px;
+  text-align: center;
+}
+
+.btn_replay,
+.btn_quit {
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.btn_replay:hover {
+  background-color: #218838;
+}
+
+.btn_quit:hover {
+  background-color: #c82333;
+}

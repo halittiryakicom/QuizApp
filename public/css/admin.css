@@ -1,0 +1,142 @@
+/* Genel stil ayarları */
+body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f6fb;
+    margin: 0;
+    padding: 0;
+    color: #222;
+}
+
+/* Header */
+header {
+    background: #2d3e50;
+    color: #fff;
+    padding: 24px 0;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    letter-spacing: 1px;
+    font-size: 2rem;
+}
+
+/* Ana içerik kutusu */
+.container {
+    max-width: 800px;
+    margin: 40px auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 24px rgba(44, 62, 80, 0.08);
+    padding: 32px 40px;
+}
+
+/* Form stilleri */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+label {
+    font-weight: 600;
+    margin-bottom: 6px;
+}
+
+input[type="text"],
+input[type="number"],
+textarea,
+select {
+    padding: 10px 12px;
+    border: 1px solid #cfd8dc;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border 0.2s;
+    background: #f8fafc;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    border-color: #1976d2;
+    outline: none;
+}
+
+/* Butonlar */
+button,
+input[type="submit"] {
+    background: #1976d2;
+    color: #fff;
+    border: none;
+    padding: 12px 28px;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-top: 8px;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background: #125ea7;
+}
+
+/* Tablo stilleri */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 28px;
+    background: #fafbfc;
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+th,
+td {
+    padding: 14px 10px;
+    text-align: left;
+}
+
+th {
+    background: #e3eaf2;
+    font-weight: 700;
+}
+
+tr:nth-child(even) {
+    background: #f4f6fb;
+}
+
+tr:hover {
+    background: #e0e7ef;
+}
+
+/* Uyarı ve mesaj kutuları */
+.alert {
+    padding: 12px 18px;
+    border-radius: 6px;
+    margin-bottom: 18px;
+    font-size: 1rem;
+}
+
+.alert-success {
+    background: #e6f4ea;
+    color: #207544;
+    border: 1px solid #b7e2c8;
+}
+
+.alert-error {
+    background: #fdeaea;
+    color: #b71c1c;
+    border: 1px solid #f5bcbc;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 18px 8px;
+    }
+
+    table,
+    th,
+    td {
+        font-size: 0.95rem;
+    }
+}

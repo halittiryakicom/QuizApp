@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Öğretmen Paneli - Quiz App</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link rel="stylesheet" href="css/teacher.css">
+</head>
+
+<body class="bg-light">
+    <!-- Header / Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-chalkboard-teacher me-2"></i>Öğretmen Paneli
+            </a>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3">
+                    <i class="fas fa-user-circle"></i>
+                    <span id="headerUserName">Yükleniyor...</span>
+                </span>
+                <a href="/admin" class="btn btn-outline-light me-2">
+                    <i class="fas fa-cog"></i> Admin Paneli
+                </a>
+                <a href="/create-test" class="btn btn-outline-light me-2">
+                    <i class="fas fa-plus-circle"></i> Yeni Test
+                </a>
+                <a href="/" class="btn btn-outline-light me-2">
+                    <i class="fas fa-home"></i> Ana Sayfa
+                </a>
+                <button onclick="logout()" class="btn btn-outline-danger">
+                    <i class="fas fa-sign-out-alt"></i> Çıkış
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <!-- Test Seçim Ekranı -->
+        <div id="testSelectionSection" class="row">
+            <div class="col-12">
+                <div class="card shadow-lg mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0">
+                                <i class="fas fa-clipboard-list"></i> Test Seçimi
+                            </h4>
+                            <div>
+                                <button class="btn btn-light btn-sm" onclick="loadTests()">
+                                    <i class="fas fa-sync"></i> Yenile
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+                        <!-- Öğretmen Adı -->
+                        <div class="mb-4" style="display: none;">
+                            <label class="form-label">
+                                <i class="fas fa-user"></i> Öğretmen Adı
+                            </label>
+                            <input type="text" class="form-control" id="teacherName" placeholder="Adınızı girin"
+                                required readonly>
+                        </div>
+
+                        <!-- Test Arama ve Filtreleme -->
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" id="testSearch"
+                                    placeholder="🔍 Test adı ile ara...">
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="categoryFilter">
+                                    <option value="">Tüm Kategoriler</option>
+                                    <option value="Genel">Genel</option>
+                                    <option value="Matematik">Matematik</option>
+                                    <option value="Fen">Fen Bilgisi</option>
+                                    <option value="C# Programlama">C# Programlama</option>
+                                    <option value="Web Geliştirme">Web Geliştirme</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Test Listesi -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-clipboard-list"></i> Test Seç
+                            </label>
+                            <div id="testList" class="row g-3">
+                                <div class="col-12 text-center py-4">
+                                    <i class="fas fa-spinner fa-spin fa-3x text-primary mb-3"></i>
+                                    <p>Testler yükleniyor...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oda Oluşturma Ekranı (ESKİ SİSTEM - GİZLİ) -->
+        <div id="createRoomSection" style="display: none;" class="row">
+            <div class="col-lg-6 mx-auto">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-primary text-white">
+                        <h4 class="mb-0">
+                            <i class="fas fa-chalkboard-teacher"></i> Öğretmen Paneli
+                        </h4>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="createRoomForm">
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-user"></i> Öğretmen Adı
+                                </label>
+                                <input type="text" class="form-control" id="teacherName" required
+                                    placeholder="Adınızı girin">
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-folder"></i> Kategori
+                                </label>
+                                <select class="form-select" id="category">
+                                    <option value="all">Tüm Sorular</option>
+                                    <option value="matematik">Matematik</option>
+                                    <option value="fen">Fen Bilgisi</option>
+                                    <option value="csharp">C# Programlama</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">
+                                    <i class="fas fa-list-ol"></i> Soru Sayısı
+                                </label>
+                                <input type="number" class="form-control" id="questionCount" value="10" min="5" max="50"
+                                    required>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="form-label">
+                                    <i class="fas fa-clock"></i> Soru Başına Süre (saniye)
+                                </label>
+                                <input type="number" class="form-control" id="timePerQuestion" value="30" min="10"
+                                    max="120" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary w-100 py-2">
+                                <i class="fas fa-plus-circle"></i> Oda Oluştur
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Oda Yönetim Ekranı -->
+        <div id="roomManageSection" style="display: none;">
+            <!-- Oda Bilgileri -->
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card shadow-lg border-0">
+                        <div class="card-header bg-success text-white">
+                            <h4 class="mb-0">
+                                <i class="fas fa-door-open"></i> Oda Oluşturuldu
+                            </h4>
+                        </div>
+                        <div class="card-body text-center p-4">
+                            <h2 class="display-4 text-primary mb-3" id="roomCodeDisplay"></h2>
+                            <p class="lead mb-4">Öğrencilerinize bu kodu verin</p>
+
+                            <div class="row g-3 mb-4">
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <i class="fas fa-list text-primary"></i>
+                                            <div><strong id="totalQuestions">0</strong></div>
+                                            <small>Soru Sayısı</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <i class="fas fa-clock text-warning"></i>
+                                            <div><strong id="totalTime">0</strong> dk</div>
+                                            <small>Toplam Süre</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <i class="fas fa-users text-success"></i>
+                                            <div><strong id="studentCount">0</strong></div>
+                                            <small>Katılımcı</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-3">
+                                    <div class="card bg-light">
+                                        <div class="card-body">
+                                            <i class="fas fa-circle" id="statusIcon"></i>
+                                            <div><strong id="roomStatus">Bekliyor</strong></div>
+                                            <small>Durum</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button id="startQuizBtn" class="btn btn-success btn-lg px-5 py-3" disabled>
+                                <i class="fas fa-play-circle"></i> Testi Başlat
+                            </button>
+                            <button id="nextQuestionBtn" class="btn btn-warning btn-lg px-5 py-3 ms-2"
+                                style="display: none;">
+                                <i class="fas fa-forward"></i> Sonraki Soru
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Katılımcı Listesi -->
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-users"></i> Katılımcılar
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="studentList" class="list-group">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-users fa-3x mb-3"></i>
+                                    <p>Henüz kimse katılmadı</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Sonuçlar -->
+                <div class="col-lg-6">
+                    <div class="card shadow">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-bar"></i> Sonuçlar
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="resultsList">
+                                <div class="text-center text-muted py-4">
+                                    <i class="fas fa-hourglass-half fa-3x mb-3"></i>
+                                    <p>Test başlamadı</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-lg-12">
+                    <!-- Burada ana sayfaya dönecek bir buton veya link ekleyebilirsiniz -->
+                    <div class="text-center mt-4">
+                        <a href="/teacher.html" class="btn btn-secondary">
+                            <i class="fas fa-home"></i> Ana Sayfaya Dön
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/teacher.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,142 @@
+[
+  {
+    "question": "C# dili ne için kullanılır?",
+    "options": [
+      "Sadece web siteleri yapmak için",
+      "Masaüstü, web ve mobil uygulamalar geliştirmek için",
+      "Sadece oyun programlamak için",
+      "Sadece veritabanı yönetmek için"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "C# hangi platformda geliştirilmiştir?",
+    "options": ["Microsoft", "Apple", "Google", "Oracle"],
+    "correct": 0
+  },
+  {
+    "question": "C# dosya uzantısı nedir?",
+    "options": [".cpp", ".java", ".cs", ".c"],
+    "correct": 2
+  },
+  {
+    "question": "Ekrana yazı yazdırmak için hangi ifade kullanılır?",
+    "options": [
+      "System.print()",
+      "Console.WriteLine()",
+      "print.console()",
+      "Console.log()"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "Aşağıdakilerden hangisi geçerli bir veri tipidir?",
+    "options": ["integer", "int", "num", "number"],
+    "correct": 1
+  },
+  {
+    "question": "C#’ta ondalıklı sayıları saklamak için hangi veri tipi kullanılır?",
+    "options": ["string", "float", "bool", "char"],
+    "correct": 1
+  },
+  {
+    "question": "Mantıksal (true/false) değerleri tutmak için hangi tip kullanılır?",
+    "options": ["string", "char", "int", "bool"],
+    "correct": 3
+  },
+  {
+    "question": "C#’ta tek bir karakteri saklamak için hangi tip kullanılır?",
+    "options": ["string", "char", "int", "float"],
+    "correct": 1
+  },
+  {
+    "question": "‘for’ döngüsü hangi amaçla kullanılır?",
+    "options": [
+      "Koşula bağlı tekrar yapmak için",
+      "Sadece bir kez çalışmak için",
+      "Yalnızca hataları yakalamak için",
+      "Veritabanı bağlantısı kurmak için"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "C#’ta koşul ifadeleri için hangi anahtar kelime kullanılır?",
+    "options": ["if", "loop", "switch", "while"],
+    "correct": 0
+  },
+  {
+    "question": "Aşağıdakilerden hangisi C#’ta geçerli bir erişim belirleyicisidir?",
+    "options": ["public", "global", "visible", "show"],
+    "correct": 0
+  },
+  {
+    "question": "‘class’ anahtar kelimesi ne için kullanılır?",
+    "options": [
+      "Metot tanımlamak için",
+      "Bir sınıf tanımlamak için",
+      "Veritabanı bağlantısı yapmak için",
+      "Döngü oluşturmak için"
+    ],
+    "correct": 1
+  },
+  {
+    "question": "C#’ta nesne yönelimli programlamanın (OOP) temel kavramlarından biri değildir?",
+    "options": ["Encapsulation", "Inheritance", "Polymorphism", "Compilation"],
+    "correct": 3
+  },
+  {
+    "question": "Aşağıdakilerden hangisi bir dizi (array) tanımıdır?",
+    "options": [
+      "int[] sayilar = new int[5];",
+      "int sayilar = [5];",
+      "array sayilar(5);",
+      "list<int> sayilar = array();"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "C#’ta ‘try-catch’ bloğu ne için kullanılır?",
+    "options": [
+      "Hata yakalamak için",
+      "Veritabanı işlemleri için",
+      "Dosya oluşturmak için",
+      "Sınıf tanımlamak için"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Aşağıdakilerden hangisi bir döngü türü değildir?",
+    "options": ["for", "while", "foreach", "switch"],
+    "correct": 3
+  },
+  {
+    "question": "C#’ta ‘namespace’ ne işe yarar?",
+    "options": [
+      "Kodları gruplandırmak için",
+      "Veritabanı yönetmek için",
+      "Renk seçmek için",
+      "Döngü çalıştırmak için"
+    ],
+    "correct": 0
+  },
+  {
+    "question": "Bir metodun geriye değer döndürmemesi için hangi anahtar kelime kullanılır?",
+    "options": ["null", "void", "empty", "none"],
+    "correct": 1
+  },
+  {
+    "question": "C#’ta kalıtım (inheritance) için hangi sembol kullanılır?",
+    "options": [":", "->", "=>", "="],
+    "correct": 0
+  },
+  {
+    "question": "LINQ ifadesi ne için kullanılır?",
+    "options": [
+      "Döngü yazmak için",
+      "Veritabanı veya koleksiyon üzerinde sorgu yapmak için",
+      "Dosya oluşturmak için",
+      "Yeni sınıf tanımlamak için"
+    ],
+    "correct": 1
+  }
+]
