@@ -161,8 +161,12 @@ function showQuestion(question, questionIndex) {
         questionIndexEl.textContent = `Soru ${questionIndex + 1} / ${totalQuestions}`;
     }
 
+    // Soru metni ve görseli hazırla
+    const imageUrl = question.image || question.imageUrl || '';
+    const imageHTML = imageUrl ? `<div class="text-center mb-3"><img src="${imageUrl}" class="img-fluid rounded shadow" style="max-height: 300px;" alt="Soru görseli" onerror="this.style.display='none'"></div>` : '';
+
     if (question.type === 'multiple') {
-        questionText.innerHTML = `<h5>${question.questionText}</h5>`;
+        questionText.innerHTML = `${imageHTML}<h5>${question.questionText}</h5>`;
 
         let optionsHTML = '';
         question.options.forEach((option, index) => {
@@ -175,7 +179,7 @@ function showQuestion(question, questionIndex) {
         optionList.innerHTML = optionsHTML;
 
     } else if (question.type === 'truefalse') {
-        questionText.innerHTML = `<h5>${question.questionText}</h5>`;
+        questionText.innerHTML = `${imageHTML}<h5>${question.questionText}</h5>`;
         optionList.innerHTML = `
             <div class="option" onclick="selectTrueFalse(this, true)">
                 <span><i class="fas fa-check text-success"></i> Doğru</span>
@@ -186,7 +190,7 @@ function showQuestion(question, questionIndex) {
         `;
 
     } else if (question.type === 'fillblank') {
-        questionText.innerHTML = `<h5>${question.questionText}</h5>`;
+        questionText.innerHTML = `${imageHTML}<h5>${question.questionText}</h5>`;
         optionList.innerHTML = `
             <div class="p-3">
                 <input type="text" class="form-control form-control-lg" id="fillBlankAnswer" 

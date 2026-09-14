@@ -138,5 +138,84 @@
       "Yeni sınıf tanımlamak için"
     ],
     "correct": 1
+  },
+  {
+    "id": "test_debug_python01",
+    "title": "Python Debugging",
+    "description": "Kod hatalarını bulma etkinliği",
+    "category": "Python",
+    "timePerQuestion": 40,
+    "questions": [
+      {
+        "id": 2101,
+        "type": "multiple",
+        "questionText": "Aşağıdaki kod neden hata verir?\n\nsayi = 5\nprint(Sayi)",
+        "options": [
+          "Değişken tanımlanmamış",
+          "Python büyük-küçük harfe duyarlı",
+          "print yanlış kullanılmış",
+          "Sözdizimi hatası var"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2102,
+        "type": "multiple",
+        "questionText": "Aşağıdaki kodun problemi nedir?\n\nfor i in range(3):\nprint(i)",
+        "options": [
+          "range yanlış",
+          "print yanlış",
+          "Girinti hatası",
+          "Değişken hatası"
+        ],
+        "correctAnswer": 2,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2103,
+        "type": "multiple",
+        "questionText": "Kod neden çalışmaz?\n\nyas = input(\"Yaş:\")\nprint(yas + 5)",
+        "options": [
+          "input yanlış",
+          "String ile sayı toplanamaz",
+          "print hatalı",
+          "Parantez eksik"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2104,
+        "type": "multiple",
+        "questionText": "Bu kodda ne hata var?\n\ni = 0\nwhile i < 3:\n    print(i)",
+        "options": [
+          "while hatalı",
+          "i artırılmıyor (sonsuz döngü)",
+          "print hatalı",
+          "range kullanılmalı"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      },
+      {
+        "id": 2105,
+        "type": "multiple",
+        "questionText": "Fonksiyon neden None döndürür?\n\ndef topla(a, b):\n    sonuc = a + b\n\nprint(topla(2,3))",
+        "options": [
+          "Fonksiyon çağrılmamış",
+          "return eksik",
+          "Parametre hatası",
+          "print hatası"
+        ],
+        "correctAnswer": 1,
+        "correctAnswers": [],
+        "pairs": []
+      }
+    ]
   }
 ]

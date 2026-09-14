@@ -96,9 +96,19 @@ function createTestCard(test) {
                 </div>
             </div>
             <div class="card-footer bg-transparent">
-                <button class="btn btn-primary btn-sm w-100" data-test-id="${test.id}" onclick="selectTestById('${test.id}')">
-                    <i class="fas fa-check-circle"></i> Bu Testi Seç
-                </button>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-sm" data-test-id="${test.id}" onclick="selectTestById('${test.id}')">
+                        <i class="fas fa-check-circle"></i> Bu Testi Seç
+                    </button>
+                    <div class="btn-group">
+                        <button class="btn btn-outline-warning btn-sm" onclick="event.stopPropagation(); editTest('${test.id}')">
+                            <i class="fas fa-edit"></i> Düzenle
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm" onclick="event.stopPropagation(); deleteTest('${test.id}', '${test.title.replace(/'/g, "\\'")}')">
+                            <i class="fas fa-trash"></i> Sil
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     `;
@@ -536,3 +546,724 @@ socket.on('connect_error', (error) => {
     console.error('Bağlantı hatası:', error);
     alert('Sunucuya bağlanırken hata oluştu!');
 });
+
+// ==================== TEST DÜZENLEME FONKSİYONLARI ====================
+
+let currentEditingTest = null;
+let editModal = null;
+
+// Test düzenleme modalını aç
+async function editTest(testId) {
+    try {
+        const response = await fetch(`/api/tests/${testId}`);
+        const test = await response.json();
+
+        currentEditingTest = test;
+
+        // Form alanlarını doldur
+        document.getElementById('editTestId').value = test.id;
+        document.getElementById('editTestTitle').value = test.title;
+        document.getElementById('editTestCategory').value = test.category;
+        document.getElementById('editTestDescription').value = test.description || '';
+        document.getElementById('editTestTime').value = test.timePerQuestion;
+
+        // Soruları listele
+        renderEditQuestions(test.questions);
+
+        // Modal'ı aç
+        if (!editModal) {
+            const modalElement = document.getElementById('editTestModal');
+            editModal = new bootstrap.Modal(modalElement);
+        }
+        editModal.show();
+
+    } catch (error) {
+        console.error('Test yüklenirken hata:', error);
+        alert('Test yüklenirken hata oluştu!');
+    }
+}
+
+// HTML karakterlerini escape et
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Soruları düzenleme listesinde göster
+function renderEditQuestions(questions) {
+    const container = document.getElementById('editQuestionsList');
+    container.innerHTML = '';
+
+    if (!questions || questions.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-5">
+                <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+                <p class="text-muted fs-5">Henüz soru eklenmedi</p>
+                <p class="text-muted small">Yeni soru eklemek için yukarıdaki butona tıklayın</p>
+            </div>
+        `;
+        return;
+    }
+
+    questions.forEach((q, index) => {
+        const questionCard = document.createElement('div');
+        questionCard.className = 'question-card';
+
+        // Soru metnini al (hem text hem questionText destekle)
+        const questionText = q.text || q.questionText || '';
+        const imageUrl = q.image || q.imageUrl || '';
+        const options = q.options || ['', '', '', ''];
+        const correctIndex = q.correct !== undefined ? q.correct : (q.correctAnswer !== undefined ? q.correctAnswer : 0);
+
+        const optionLabels = ['A', 'B', 'C', 'D'];
+        const optionClasses = ['option-a', 'option-b', 'option-c', 'option-d'];
+        const labelClasses = ['label-a', 'label-b', 'label-c', 'label-d'];
+
+        questionCard.innerHTML = `
+            <div class="question-card-header">
+                <div class="question-number">
+                    <i class="fas fa-question-circle"></i>
+                    <span>Soru ${index + 1}</span>
+                </div>
+                <button type="button" class="btn-delete-question" onclick="deleteQuestion(${index})">
+                    <i class="fas fa-trash-alt"></i> Sil
+                </button>
+            </div>
+            <div class="question-card-body">
+                <!-- Soru Metni -->
+                <div class="mb-4">
+                    <label class="modern-label">
+                        <i class="fas fa-align-left"></i>
+                        Soru Metni
+                        <span class="required-star">*</span>
+                    </label>
+                    <textarea class="form-control modern-textarea question-text" 
+                              data-index="${index}" 
+                              rows="3" 
+                              required
+                              placeholder="Sorunuzu buraya yazın..."></textarea>
+                </div>
+
+                <!-- Görsel Yükleme -->
+                <div class="mb-4">
+                    <label class="modern-label">
+                        <i class="fas fa-image"></i>
+                        Soru Görseli
+                        <span class="badge bg-secondary ms-2" style="font-size: 0.7rem;">Opsiyonel</span>
+                    </label>
+                    <div class="image-upload-area" 
+                         id="uploadArea${index}" 
+                         data-index="${index}" 
+                         ondragover="handleDragOver(event, ${index})" 
+                         ondragleave="handleDragLeave(event, ${index})" 
+                         ondrop="handleDrop(event, ${index})"
+                         onclick="document.getElementById('fileInput${index}').click()">
+                        <div class="upload-icon">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="upload-text">Görseli Sürükle & Bırak</div>
+                        <div class="upload-subtext">veya tıklayarak dosya seç (Max: 500KB)</div>
+                        <input type="file" 
+                               id="fileInput${index}" 
+                               data-index="${index}" 
+                               accept="image/*" 
+                               style="display: none;" 
+                               onchange="handleFileSelect(event, ${index})">
+                    </div>
+                    <div class="image-preview-container" id="imagePreview${index}" style="display: none;">
+                        <img src="" class="img-fluid" alt="Soru görseli">
+                        <button type="button" class="remove-image-btn" onclick="removeImage(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <input type="hidden" class="question-image-data" data-index="${index}">
+                </div>
+
+                <!-- Ayırıcı -->
+                <div class="section-divider"></div>
+
+                <!-- Şıklar -->
+                <div class="mb-3">
+                    <label class="modern-label">
+                        <i class="fas fa-list-ul"></i>
+                        Cevap Şıkları
+                        <span class="required-star">*</span>
+                    </label>
+                </div>
+                <div class="option-group">
+                    ${optionLabels.map((label, i) => `
+                        <div class="option-card ${optionClasses[i]}">
+                            <div class="option-label ${labelClasses[i]}">${label}</div>
+                            <div class="option-input-wrapper">
+                                <input type="text" 
+                                       class="form-control option-input" 
+                                       data-index="${index}" 
+                                       data-option="${i}"
+                                       placeholder="${label} şıkkını girin..."
+                                       required>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <!-- Doğru Cevap -->
+                <div class="correct-answer-section">
+                    <label class="modern-label mb-2">
+                        <i class="fas fa-check-circle"></i>
+                        Doğru Cevap
+                        <span class="required-star">*</span>
+                    </label>
+                    <select class="form-select correct-answer-select correct-answer" data-index="${index}" required>
+                        <option value="0" ${correctIndex === 0 ? 'selected' : ''}>A) ${optionLabels[0]} Şıkkı</option>
+                        <option value="1" ${correctIndex === 1 ? 'selected' : ''}>B) ${optionLabels[1]} Şıkkı</option>
+                        <option value="2" ${correctIndex === 2 ? 'selected' : ''}>C) ${optionLabels[2]} Şıkkı</option>
+                        <option value="3" ${correctIndex === 3 ? 'selected' : ''}>D) ${optionLabels[3]} Şıkkı</option>
+                    </select>
+                </div>
+            </div>
+        `;
+        container.appendChild(questionCard);
+
+        // Değerleri JavaScript ile set et (HTML escape sorunu olmaması için)
+        const textArea = questionCard.querySelector('.question-text');
+        if (textArea) textArea.value = questionText;
+
+        // Görsel varsa önizleme göster
+        const imageDataInput = questionCard.querySelector('.question-image-data');
+        if (imageDataInput && imageUrl) {
+            imageDataInput.value = imageUrl;
+            showImagePreview(index, imageUrl);
+        }
+
+        // Şıkları set et
+        for (let i = 0; i < 4; i++) {
+            const optionInput = questionCard.querySelector(`.option-input[data-option="${i}"]`);
+            if (optionInput) optionInput.value = options[i] || '';
+        }
+    });
+}
+
+
+// Drag & Drop event handlers
+function handleDragOver(event, index) {
+    event.preventDefault();
+    event.stopPropagation();
+    const uploadArea = document.getElementById(`uploadArea${index}`);
+    if (uploadArea) {
+        uploadArea.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(event, index) {
+    event.preventDefault();
+    event.stopPropagation();
+    const uploadArea = document.getElementById(`uploadArea${index}`);
+    if (uploadArea) {
+        uploadArea.classList.remove('drag-over');
+    }
+}
+
+function handleDrop(event, index) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const uploadArea = document.getElementById(`uploadArea${index}`);
+    if (uploadArea) {
+        uploadArea.classList.remove('drag-over');
+    }
+
+    const files = event.dataTransfer.files;
+    if (files.length > 0) {
+        processImageFile(files[0], index);
+    }
+}
+
+function handleFileSelect(event, index) {
+    const files = event.target.files;
+    if (files.length > 0) {
+        processImageFile(files[0], index);
+    }
+}
+
+// Görsel dosyasını işle ve base64'e çevir
+function processImageFile(file, index) {
+    // Dosya tipi kontrolü
+    if (!file.type.startsWith('image/')) {
+        alert('Lütfen sadece görsel dosyası yükleyin!');
+        return;
+    }
+
+    // Dosya boyutu kontrolü (max 5MB orijinal boyut)
+    if (file.size > 5 * 1024 * 1024) {
+        alert('Görsel boyutu 5MB\'dan küçük olmalıdır!');
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const img = new Image();
+        img.onload = function () {
+            // Görseli yeniden boyutlandır ve sıkıştır
+            const canvas = document.createElement('canvas');
+            let width = img.width;
+            let height = img.height;
+
+            // Maksimum boyut 800px
+            const maxSize = 800;
+            if (width > maxSize || height > maxSize) {
+                if (width > height) {
+                    height = (height / width) * maxSize;
+                    width = maxSize;
+                } else {
+                    width = (width / height) * maxSize;
+                    height = maxSize;
+                }
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // JPEG formatında %80 kalite ile sıkıştır
+            const base64Data = canvas.toDataURL('image/jpeg', 0.8);
+
+            // Boyut kontrolü (sıkıştırılmış hali max 500KB olmalı)
+            const sizeInKB = (base64Data.length * 3) / 4 / 1024;
+            if (sizeInKB > 500) {
+                alert('Görsel çok büyük! Lütfen daha küçük bir görsel seçin veya boyutunu küçültün.');
+                return;
+            }
+
+            // Hidden input'a base64 verisini kaydet
+            const imageDataInput = document.querySelector(`.question-image-data[data-index="${index}"]`);
+            if (imageDataInput) {
+                imageDataInput.value = base64Data;
+            }
+
+            // Önizlemeyi göster
+            showImagePreview(index, base64Data);
+
+            // Upload alanını gizle
+            const uploadArea = document.getElementById(`uploadArea${index}`);
+            if (uploadArea) {
+                uploadArea.style.display = 'none';
+            }
+        };
+
+        img.onerror = function () {
+            alert('Görsel yüklenirken bir hata oluştu!');
+        };
+
+        img.src = e.target.result;
+    };
+
+    reader.onerror = function () {
+        alert('Dosya okunurken bir hata oluştu!');
+    };
+
+    reader.readAsDataURL(file);
+}
+
+// Görseli kaldır
+function removeImage(index) {
+    // Hidden input'u temizle
+    const imageDataInput = document.querySelector(`.question-image-data[data-index="${index}"]`);
+    if (imageDataInput) {
+        imageDataInput.value = '';
+    }
+
+    // Önizlemeyi gizle
+    const preview = document.getElementById(`imagePreview${index}`);
+    if (preview) {
+        preview.style.display = 'none';
+    }
+
+    // Upload alanını göster
+    const uploadArea = document.getElementById(`uploadArea${index}`);
+    if (uploadArea) {
+        uploadArea.style.display = 'block';
+    }
+
+    // File input'u temizle
+    const fileInput = document.getElementById(`fileInput${index}`);
+    if (fileInput) {
+        fileInput.value = '';
+    }
+}
+
+// Görsel önizleme göster
+function showImagePreview(index, url) {
+    const preview = document.getElementById(`imagePreview${index}`);
+    if (!preview) return;
+
+    if (url && url.trim()) {
+        const img = preview.querySelector('img');
+        img.src = url;
+        img.onerror = () => {
+            preview.style.display = 'none';
+        };
+        img.onload = () => {
+            preview.style.display = 'block';
+        };
+    } else {
+        preview.style.display = 'none';
+    }
+}
+
+// Yeni soru ekle
+function addNewQuestion() {
+    if (!currentEditingTest) return;
+
+    const newQuestion = {
+        text: '',
+        questionText: '',
+        options: ['', '', '', ''],
+        correct: 0,
+        correctAnswer: 0,
+        image: ''
+    };
+
+    currentEditingTest.questions.push(newQuestion);
+    renderEditQuestions(currentEditingTest.questions);
+}
+
+// Soru sil
+function deleteQuestion(index) {
+    if (!currentEditingTest) return;
+
+    if (confirm(`${index + 1}. soruyu silmek istediğinizden emin misiniz?`)) {
+        currentEditingTest.questions.splice(index, 1);
+        renderEditQuestions(currentEditingTest.questions);
+    }
+}
+
+// Değişiklikleri kaydet
+async function saveTestChanges() {
+    try {
+        // Form verilerini topla
+        const testId = document.getElementById('editTestId').value;
+        const title = document.getElementById('editTestTitle').value.trim();
+        const category = document.getElementById('editTestCategory').value;
+        const description = document.getElementById('editTestDescription').value.trim();
+        const timePerQuestion = parseInt(document.getElementById('editTestTime').value);
+
+        if (!title) {
+            alert('Test adı boş olamaz!');
+            return;
+        }
+
+        // Soruları topla
+        const questions = [];
+        const questionTexts = document.querySelectorAll('.question-text');
+
+        questionTexts.forEach((textarea, index) => {
+            const text = textarea.value.trim();
+            const imageDataInput = document.querySelector(`.question-image-data[data-index="${index}"]`);
+            const imageData = imageDataInput ? imageDataInput.value.trim() : '';
+            const options = [];
+
+            // Şıkları topla
+            for (let i = 0; i < 4; i++) {
+                const optionInput = document.querySelector(`.option-input[data-index="${index}"][data-option="${i}"]`);
+                options.push(optionInput ? optionInput.value.trim() : '');
+            }
+
+            const correctSelect = document.querySelector(`.correct-answer[data-index="${index}"]`);
+            const correct = correctSelect ? parseInt(correctSelect.value) : 0;
+
+            if (text && options.every(o => o)) {
+                questions.push({
+                    text: text,
+                    questionText: text,  // Eski sistemle uyum için
+                    options: options,
+                    correct: correct,
+                    correctAnswer: correct,  // Eski sistemle uyum için
+                    image: imageData,
+                    imageUrl: imageData,  // Alternatif alan adı
+                    type: 'multiple',
+                    correctAnswers: [],
+                    pairs: []
+                });
+            }
+        });
+
+        if (questions.length === 0) {
+            alert('En az bir soru eklemelisiniz!');
+            return;
+        }
+
+        // API'ye gönder
+        const response = await fetch(`/api/tests/${testId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                title,
+                category,
+                description,
+                timePerQuestion,
+                questions
+            })
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error('Server hatası:', errorText);
+            alert(`❌ Test güncellenemedi! Sunucu hatası: ${response.status}\n\nGörseller çok büyük olabilir. Lütfen daha küçük görseller kullanın.`);
+            return;
+        }
+
+        const result = await response.json();
+
+        alert('✅ Test başarıyla güncellendi!');
+        editModal.hide();
+        loadTests(); // Test listesini yenile
+
+    } catch (error) {
+        console.error('Test kaydedilirken hata:', error);
+        alert('❌ Test kaydedilirken hata oluştu: ' + error.message + '\n\nGörseller çok büyük olabilir. Lütfen daha küçük görseller kullanın.');
+    }
+}
+
+// Test sil
+async function deleteTest(testId, testTitle) {
+    if (!confirm(`"${testTitle}" testini silmek istediğinizden emin misiniz?\n\nBu işlem geri alınamaz!`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/tests/${testId}`, {
+            method: 'DELETE'
+        });
+
+        if (!response.ok) {
+            throw new Error('Silme hatası');
+        }
+
+        alert('Test başarıyla silindi!');
+        loadTests(); // Test listesini yenile
+
+    } catch (error) {
+        console.error('Test silinirken hata:', error);
+        alert('Test silinirken hata oluştu!');
+    }
+}
+
+// ==================== KATEGORİ YÖNETİMİ ====================
+
+let categoryManagementModal = null;
+let allCategories = [];
+
+// Kategorileri yükle ve select'i doldur
+async function loadCategories() {
+    try {
+        const response = await fetch('/api/categories');
+        allCategories = await response.json();
+
+        // Kategori select'lerini güncelle
+        updateCategorySelects();
+
+        return allCategories;
+    } catch (error) {
+        console.error('Kategoriler yüklenirken hata:', error);
+        return [];
+    }
+}
+
+// Kategori select'lerini güncelle
+function updateCategorySelects() {
+    // Test düzenleme modalındaki kategori dropdown'unu güncelle
+    const editSelect = document.getElementById('editTestCategory');
+    const editCurrentValue = editSelect ? editSelect.value : '';
+
+    if (editSelect) {
+        editSelect.innerHTML = allCategories.map(cat =>
+            `<option value="${cat.name}" ${cat.name === editCurrentValue ? 'selected' : ''}>${cat.name}</option>`
+        ).join('');
+    }
+
+    // Ana sayfadaki kategori filtre dropdown'unu güncelle
+    const filterSelect = document.getElementById('categoryFilter');
+    if (filterSelect) {
+        const filterCurrentValue = filterSelect.value;
+        filterSelect.innerHTML = `
+            <option value="">Tüm Kategoriler</option>
+            ${allCategories.map(cat =>
+            `<option value="${cat.name}" ${cat.name === filterCurrentValue ? 'selected' : ''}>${cat.name}</option>`
+        ).join('')}
+        `;
+    }
+}
+
+// Kategori yönetimi modalını aç
+function openCategoryManagement() {
+    if (!categoryManagementModal) {
+        const modalElement = document.getElementById('categoryManagementModal');
+        categoryManagementModal = new bootstrap.Modal(modalElement);
+    }
+
+    // Kategorileri yükle ve listele
+    loadCategoriesInModal();
+    categoryManagementModal.show();
+}
+
+// Modal'da kategorileri listele
+async function loadCategoriesInModal() {
+    const container = document.getElementById('categoriesList');
+    container.innerHTML = `
+        <div class="text-center py-4">
+            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+            <p class="mt-2">Kategoriler yükleniyor...</p>
+        </div>
+    `;
+
+    try {
+        const categories = await loadCategories();
+
+        if (categories.length === 0) {
+            container.innerHTML = `
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-folder-open fa-3x mb-3"></i>
+                    <p>Henüz kategori eklenmedi</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = categories.map(cat => `
+            <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                    <i class="fas fa-tag text-primary me-2"></i>
+                    <span id="catName-${cat.id}">${cat.name}</span>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-warning" onclick="editCategoryInline('${cat.id}', '${cat.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-edit"></i> Düzenle
+                    </button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteCategory('${cat.id}', '${cat.name.replace(/'/g, "\\'")}')">
+                        <i class="fas fa-trash"></i> Sil
+                    </button>
+                </div>
+            </div>
+        `).join('');
+    } catch (error) {
+        container.innerHTML = `
+            <div class="alert alert-danger">
+                <i class="fas fa-exclamation-triangle"></i> Kategoriler yüklenirken hata oluştu!
+            </div>
+        `;
+    }
+}
+
+// Yeni kategori ekle
+async function addCategory() {
+    const input = document.getElementById('newCategoryName');
+    const name = input.value.trim();
+
+    if (!name) {
+        alert('Lütfen kategori adı girin!');
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/categories', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || 'Kategori eklenirken hata oluştu!');
+            return;
+        }
+
+        input.value = '';
+        alert('✅ Kategori başarıyla eklendi!');
+        loadCategoriesInModal();
+
+    } catch (error) {
+        console.error('Kategori ekleme hatası:', error);
+        alert('Kategori eklenirken hata oluştu!');
+    }
+}
+
+// Kategori inline düzenle
+function editCategoryInline(id, currentName) {
+    const newName = prompt('Yeni kategori adı:', currentName);
+
+    if (!newName || newName.trim() === '') {
+        return;
+    }
+
+    if (newName.trim() === currentName) {
+        return;
+    }
+
+    updateCategory(id, newName.trim());
+}
+
+// Kategori güncelle
+async function updateCategory(id, name) {
+    try {
+        const response = await fetch(`/api/categories/${id}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ name })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || 'Kategori güncellenirken hata oluştu!');
+            return;
+        }
+
+        alert('✅ Kategori başarıyla güncellendi!');
+        loadCategoriesInModal();
+
+    } catch (error) {
+        console.error('Kategori güncelleme hatası:', error);
+        alert('Kategori güncellenirken hata oluştu!');
+    }
+}
+
+// Kategori sil
+async function deleteCategory(id, name) {
+    if (!confirm(`"${name}" kategorisini silmek istediğinizden emin misiniz?\n\nBu kategoriye ait testler varsa silinemez.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/categories/${id}`, {
+            method: 'DELETE'
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            alert(result.error || 'Kategori silinirken hata oluştu!');
+            return;
+        }
+
+        alert('✅ Kategori başarıyla silindi!');
+        loadCategoriesInModal();
+
+    } catch (error) {
+        console.error('Kategori silme hatası:', error);
+        alert('Kategori silinirken hata oluştu!');
+    }
+}
+
+// Sayfa yüklendiğinde kategorileri yükle
+loadCategories();

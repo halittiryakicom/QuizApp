@@ -8,8 +8,9 @@ const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
 
-// JSON parser middleware
-app.use(express.json());
+// JSON parser middleware - Görsel yükleme için limit artırıldı
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Static dosyaları serve et
 app.use(express.static('public'));
@@ -56,6 +57,32 @@ function loadQuestions() {
     const questionsPath = path.join(__dirname, 'data', 'questions.json');
     const data = fs.readFileSync(questionsPath, 'utf8');
     return JSON.parse(data);
+}
+
+// ==================== KATEGORİ YÖNETİMİ ====================
+
+// Kategorileri yükle
+function loadCategories() {
+    const categoriesPath = path.join(__dirname, 'data', 'categories.json');
+    try {
+        const data = fs.readFileSync(categoriesPath, 'utf8');
+        return JSON.parse(data);
+    } catch (error) {
+        return [
+            { id: 'cat_001', name: 'Genel', createdAt: new Date() }
+        ];
+    }
+}
+
+// Kategorileri kaydet
+function saveCategories(categories) {
+    const categoriesPath = path.join(__dirname, 'data', 'categories.json');
+    fs.writeFileSync(categoriesPath, JSON.stringify(categories, null, 2));
+}
+
+// Kategori ID üretici
+function generateCategoryId() {
+    return 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
 // ==================== KULLANICI YÖNETİMİ ====================
@@ -309,7 +336,95 @@ app.delete('/api/tests/:id', (req, res) => {
     res.json({ success: true });
 });
 
-// Test istatistiklerini güncelle
+// ==================== KATEGORİ API ====================
+
+// Tüm kategorileri getir
+app.get('/api/categories', (req, res) => {
+    const categories = loadCategories();
+    res.json(categories);
+});
+
+// Yeni kategori ekle
+app.post('/api/categories', (req, res) => {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Kategori adı gerekli' });
+    }
+
+    const categories = loadCategories();
+
+    // Aynı isimde kategori var mı kontrol et
+    if (categories.some(c => c.name.toLowerCase() === name.trim().toLowerCase())) {
+        return res.status(400).json({ error: 'Bu kategori zaten mevcut' });
+    }
+
+    const newCategory = {
+        id: generateCategoryId(),
+        name: name.trim(),
+        createdAt: new Date()
+    };
+
+    categories.push(newCategory);
+    saveCategories(categories);
+
+    res.json({ success: true, category: newCategory });
+});
+
+// Kategori güncelle
+app.put('/api/categories/:id', (req, res) => {
+    const { name } = req.body;
+
+    if (!name || !name.trim()) {
+        return res.status(400).json({ error: 'Kategori adı gerekli' });
+    }
+
+    const categories = loadCategories();
+    const index = categories.findIndex(c => c.id === req.params.id);
+
+    if (index === -1) {
+        return res.status(404).json({ error: 'Kategori bulunamadı' });
+    }
+
+    // Aynı isimde başka kategori var mı kontrol et (kendisi hariç)
+    if (categories.some((c, i) => i !== index && c.name.toLowerCase() === name.trim().toLowerCase())) {
+        return res.status(400).json({ error: 'Bu kategori adı zaten kullanılıyor' });
+    }
+
+    categories[index].name = name.trim();
+    categories[index].updatedAt = new Date();
+
+    saveCategories(categories);
+    res.json({ success: true, category: categories[index] });
+});
+
+// Kategori sil
+app.delete('/api/categories/:id', (req, res) => {
+    const categories = loadCategories();
+    const categoryToDelete = categories.find(c => c.id === req.params.id);
+
+    if (!categoryToDelete) {
+        return res.status(404).json({ error: 'Kategori bulunamadı' });
+    }
+
+    // Bu kategoriye ait test var mı kontrol et
+    const tests = loadTests();
+    const testsInCategory = tests.filter(t => t.category === categoryToDelete.name);
+
+    if (testsInCategory.length > 0) {
+        return res.status(400).json({
+            error: `Bu kategoriye ait ${testsInCategory.length} test var. Önce testleri silin veya başka kategoriye taşıyın.`
+        });
+    }
+
+    const filteredCategories = categories.filter(c => c.id !== req.params.id);
+    saveCategories(filteredCategories);
+
+    res.json({ success: true });
+});
+
+// ==================== TEST İSTATİSTİKLERİ ====================
+
 // Test istatistiklerini güncelle
 function updateTestStatistics(testId, roomResults) {
     const tests = loadTests();
@@ -825,8 +940,10 @@ io.on('connection', (socket) => {
 });
 
 const PORT = 3000;
-server.listen(PORT, () => {
+const HOST = '0.0.0.0'; // Tüm network interface'lerinde dinle
+server.listen(PORT, HOST, () => {
     console.log(`Server http://localhost:${PORT} adresinde çalışıyor`);
+    console.log(`Ağ erişimi için: http://<BILGISAYAR-IP>:${PORT}`);
     console.log(`Öğretmen paneli: http://localhost:${PORT}/teacher`);
     console.log(`Admin paneli: http://localhost:${PORT}/admin`);
 });

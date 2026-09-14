@@ -42,5 +42,5 @@ build/
 tmp/
 
 # Data files (optional - uncomment if you don't want to commit user data)
-# data/users.json
+data/users.json
 # data/tests.json
