@@ -7,14 +7,19 @@ const io = new Server(server);
 const path = require('path');
 const fs = require('fs');
 const bcrypt = require('bcrypt');
+const db = require('./database/db-helpers');
 
 // JSON parser middleware - Görsel yükleme için limit artırıldı
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ limit: '10mb', extended: true }));
 
 // Static dosyaları serve et
-app.use(express.static('public'));
-app.use('/data', express.static('data'));
+// __dirname ile mutlak yol kullanılıyor — bare 'public'/'data' relatif yolları
+// process.cwd()'ye göre çözülür, uygulama başka bir dizinden başlatıldığında
+// (ör. bir process manager veya farklı bir çalışma dizininden `node server.js`)
+// tüm CSS/JS/veri dosyaları 404 dönerdi.
+app.use(express.static(path.join(__dirname, 'public')));
+app.use('/data', express.static(path.join(__dirname, 'data')));
 
 // ==================== ODA VE TEST YÖNETİMİ ====================
 const rooms = new Map(); // Tüm odaları saklayacak
@@ -35,73 +40,16 @@ function generateTestId() {
     return 'test_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 }
 
-// Testleri yükle
-function loadTests() {
-    const testsPath = path.join(__dirname, 'data', 'tests.json');
-    try {
-        const data = fs.readFileSync(testsPath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-}
-
-// Testleri kaydet
-function saveTests(tests) {
-    const testsPath = path.join(__dirname, 'data', 'tests.json');
-    fs.writeFileSync(testsPath, JSON.stringify(tests, null, 2));
-}
-
-// Soruları yükle (eski sistem - uyumluluk için)
-function loadQuestions() {
-    const questionsPath = path.join(__dirname, 'data', 'questions.json');
-    const data = fs.readFileSync(questionsPath, 'utf8');
-    return JSON.parse(data);
-}
-
-// ==================== KATEGORİ YÖNETİMİ ====================
-
-// Kategorileri yükle
-function loadCategories() {
-    const categoriesPath = path.join(__dirname, 'data', 'categories.json');
-    try {
-        const data = fs.readFileSync(categoriesPath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        return [
-            { id: 'cat_001', name: 'Genel', createdAt: new Date() }
-        ];
-    }
-}
-
-// Kategorileri kaydet
-function saveCategories(categories) {
-    const categoriesPath = path.join(__dirname, 'data', 'categories.json');
-    fs.writeFileSync(categoriesPath, JSON.stringify(categories, null, 2));
-}
+// Not: Testler, kategoriler ve kullanıcılar artık database/db-helpers.js
+// üzerinden SQLite'ta (data/quizapp.db) saklanıyor — bkz. `const db = ...`
+// importu yukarıda. Eskiden burada data/*.json dosyalarını tamamen okuyup
+// tekrar yazan loadTests/saveTests/loadCategories/saveCategories/
+// loadUsers/saveUsers fonksiyonları vardı; aşağıdaki route'lar artık
+// doğrudan db.* fonksiyonlarını çağırıyor.
 
 // Kategori ID üretici
 function generateCategoryId() {
     return 'cat_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-}
-
-// ==================== KULLANICI YÖNETİMİ ====================
-
-// Kullanıcıları yükle
-function loadUsers() {
-    const usersPath = path.join(__dirname, 'data', 'users.json');
-    try {
-        const data = fs.readFileSync(usersPath, 'utf8');
-        return JSON.parse(data);
-    } catch (error) {
-        return [];
-    }
-}
-
-// Kullanıcıları kaydet
-function saveUsers(users) {
-    const usersPath = path.join(__dirname, 'data', 'users.json');
-    fs.writeFileSync(usersPath, JSON.stringify(users, null, 2));
 }
 
 // Basit token üretici
@@ -118,8 +66,7 @@ function authenticateTeacher(req, res, next) {
     }
 
     // Basit token kontrolü (production'da JWT kullanılmalı)
-    const users = loadUsers();
-    const user = users.find(u => u.token === token);
+    const user = db.getUserByToken(token);
 
     if (!user) {
         return res.status(401).json({ error: 'Geçersiz token' });
@@ -161,27 +108,21 @@ app.post('/api/auth/register', async (req, res) => {
         return res.json({ success: false, message: 'Tüm alanları doldurun' });
     }
 
-    const users = loadUsers();
-
     // Kullanıcı adı kontrolü
-    if (users.find(u => u.username === username)) {
+    if (db.getUserByUsername(username)) {
         return res.json({ success: false, message: 'Bu kullanıcı adı zaten kullanılıyor' });
     }
 
     // Şifreyi hashle
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = {
+    db.createUser({
         id: 'user_' + Date.now(),
         fullName,
         username,
         password: hashedPassword,
         role: 'teacher',
-        createdAt: new Date()
-    };
-
-    users.push(newUser);
-    saveUsers(users);
+    });
 
     res.json({ success: true, message: 'Kayıt başarılı' });
 });
@@ -190,8 +131,7 @@ app.post('/api/auth/register', async (req, res) => {
 app.post('/api/auth/login', async (req, res) => {
     const { username, password } = req.body;
 
-    const users = loadUsers();
-    const user = users.find(u => u.username === username);
+    const user = db.getUserByUsername(username);
 
     if (!user) {
         return res.json({ success: false, message: 'Kullanıcı adı veya şifre hatalı' });
@@ -206,9 +146,7 @@ app.post('/api/auth/login', async (req, res) => {
 
     // Token üret ve kaydet
     const token = generateToken();
-    user.token = token;
-    user.lastLogin = new Date();
-    saveUsers(users);
+    db.setUserLoginToken(user.id, token);
 
     res.json({
         success: true,
@@ -229,21 +167,13 @@ app.post('/api/auth/reset-password', async (req, res) => {
         return res.json({ success: false, message: 'Kullanıcı adı ve yeni şifre gerekli' });
     }
 
-    const users = loadUsers();
-    const user = users.find(u => u.username === username);
-
-    if (!user) {
+    if (!db.getUserByUsername(username)) {
         return res.json({ success: false, message: 'Kullanıcı bulunamadı' });
     }
 
-    // Yeni şifreyi hashle
+    // Yeni şifreyi hashle; resetUserPassword aynı zamanda token'ı sıfırlar (güvenlik için)
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    user.password = hashedPassword;
-
-    // Token'ı sıfırla (güvenlik için)
-    delete user.token;
-
-    saveUsers(users);
+    db.resetUserPassword(username, hashedPassword);
 
     res.json({ success: true, message: 'Şifre başarıyla sıfırlandı' });
 });
@@ -257,14 +187,12 @@ app.get('/create-test', (req, res) => {
 
 // Tüm testleri listele
 app.get('/api/tests', (req, res) => {
-    const tests = loadTests();
-    res.json(tests);
+    res.json(db.getAllTests());
 });
 
 // Belirli bir testi getir
 app.get('/api/tests/:id', (req, res) => {
-    const tests = loadTests();
-    const test = tests.find(t => t.id === req.params.id);
+    const test = db.getTestById(req.params.id);
     if (test) {
         res.json(test);
     } else {
@@ -276,26 +204,14 @@ app.get('/api/tests/:id', (req, res) => {
 app.post('/api/tests', (req, res) => {
     const { title, description, category, timePerQuestion, questions } = req.body;
 
-    const tests = loadTests();
-    const newTest = {
+    const newTest = db.createTest({
         id: generateTestId(),
         title,
         description,
         category,
         timePerQuestion: timePerQuestion || 30,
         questions,
-        createdAt: new Date(),
-        playCount: 0,
-        statistics: {
-            totalPlays: 0,
-            totalStudents: 0,
-            averageScore: 0,
-            completionRate: 0
-        }
-    };
-
-    tests.push(newTest);
-    saveTests(tests);
+    });
 
     res.json({
         success: true,
@@ -305,34 +221,21 @@ app.post('/api/tests', (req, res) => {
 
 // Test güncelle
 app.put('/api/tests/:id', (req, res) => {
-    const tests = loadTests();
-    const index = tests.findIndex(t => t.id === req.params.id);
+    const updated = db.updateTest(req.params.id, req.body);
 
-    if (index === -1) {
+    if (!updated) {
         return res.status(404).json({ error: 'Test bulunamadı' });
     }
 
-    tests[index] = {
-        ...tests[index],
-        ...req.body,
-        updatedAt: new Date()
-    };
-
-    saveTests(tests);
-    res.json({ success: true, test: tests[index] });
+    res.json({ success: true, test: updated });
 });
 
 // Test sil
 app.delete('/api/tests/:id', (req, res) => {
-    let tests = loadTests();
-    const initialLength = tests.length;
-    tests = tests.filter(t => t.id !== req.params.id);
-
-    if (tests.length === initialLength) {
+    if (!db.deleteTest(req.params.id)) {
         return res.status(404).json({ error: 'Test bulunamadı' });
     }
 
-    saveTests(tests);
     res.json({ success: true });
 });
 
@@ -340,8 +243,7 @@ app.delete('/api/tests/:id', (req, res) => {
 
 // Tüm kategorileri getir
 app.get('/api/categories', (req, res) => {
-    const categories = loadCategories();
-    res.json(categories);
+    res.json(db.getAllCategories());
 });
 
 // Yeni kategori ekle
@@ -352,21 +254,14 @@ app.post('/api/categories', (req, res) => {
         return res.status(400).json({ error: 'Kategori adı gerekli' });
     }
 
-    const categories = loadCategories();
+    const trimmedName = name.trim();
 
     // Aynı isimde kategori var mı kontrol et
-    if (categories.some(c => c.name.toLowerCase() === name.trim().toLowerCase())) {
+    if (db.categoryNameExists(trimmedName)) {
         return res.status(400).json({ error: 'Bu kategori zaten mevcut' });
     }
 
-    const newCategory = {
-        id: generateCategoryId(),
-        name: name.trim(),
-        createdAt: new Date()
-    };
-
-    categories.push(newCategory);
-    saveCategories(categories);
+    const newCategory = db.createCategory({ id: generateCategoryId(), name: trimmedName });
 
     res.json({ success: true, category: newCategory });
 });
@@ -379,117 +274,49 @@ app.put('/api/categories/:id', (req, res) => {
         return res.status(400).json({ error: 'Kategori adı gerekli' });
     }
 
-    const categories = loadCategories();
-    const index = categories.findIndex(c => c.id === req.params.id);
+    const trimmedName = name.trim();
 
-    if (index === -1) {
+    if (!db.getCategoryById(req.params.id)) {
         return res.status(404).json({ error: 'Kategori bulunamadı' });
     }
 
     // Aynı isimde başka kategori var mı kontrol et (kendisi hariç)
-    if (categories.some((c, i) => i !== index && c.name.toLowerCase() === name.trim().toLowerCase())) {
+    if (db.categoryNameExists(trimmedName, req.params.id)) {
         return res.status(400).json({ error: 'Bu kategori adı zaten kullanılıyor' });
     }
 
-    categories[index].name = name.trim();
-    categories[index].updatedAt = new Date();
-
-    saveCategories(categories);
-    res.json({ success: true, category: categories[index] });
+    const updated = db.updateCategoryName(req.params.id, trimmedName);
+    res.json({ success: true, category: updated });
 });
 
 // Kategori sil
 app.delete('/api/categories/:id', (req, res) => {
-    const categories = loadCategories();
-    const categoryToDelete = categories.find(c => c.id === req.params.id);
+    const categoryToDelete = db.getCategoryById(req.params.id);
 
     if (!categoryToDelete) {
         return res.status(404).json({ error: 'Kategori bulunamadı' });
     }
 
     // Bu kategoriye ait test var mı kontrol et
-    const tests = loadTests();
-    const testsInCategory = tests.filter(t => t.category === categoryToDelete.name);
+    const testsInCategoryCount = db.countTestsByCategory(categoryToDelete.name);
 
-    if (testsInCategory.length > 0) {
+    if (testsInCategoryCount > 0) {
         return res.status(400).json({
-            error: `Bu kategoriye ait ${testsInCategory.length} test var. Önce testleri silin veya başka kategoriye taşıyın.`
+            error: `Bu kategoriye ait ${testsInCategoryCount} test var. Önce testleri silin veya başka kategoriye taşıyın.`
         });
     }
 
-    const filteredCategories = categories.filter(c => c.id !== req.params.id);
-    saveCategories(filteredCategories);
+    db.deleteCategory(req.params.id);
 
     res.json({ success: true });
 });
 
 // ==================== TEST İSTATİSTİKLERİ ====================
 
-// Test istatistiklerini güncelle
+// Test istatistiklerini güncelle (hesaplama mantığı artık database/db-helpers.js
+// içindeki recordTestSessionStatistics()'te — burada sadece çağırıyoruz).
 function updateTestStatistics(testId, roomResults) {
-    const tests = loadTests();
-    const test = tests.find(t => t.id === testId);
-
-    if (!test) return;
-
-    // Eğer statistics objesi yoksa oluştur
-    if (!test.statistics) {
-        test.statistics = {
-            totalPlays: 0,
-            totalStudents: 0,
-            averageScore: 0,
-            completionRate: 0
-        };
-    }
-
-    // Oynatma sayısını artır (eski playCount'u da güncelle)
-    test.playCount = (test.playCount || 0) + 1;
-
-    // İstatistikleri güncelle
-    const previousTotalPlays = test.statistics.totalPlays || 0;
-    const previousAverageScore = test.statistics.averageScore || 0;
-
-    test.statistics.totalPlays = previousTotalPlays + 1;
-    test.statistics.totalStudents = (test.statistics.totalStudents || 0) + roomResults.length;
-
-    if (roomResults.length > 0) {
-        // Bu oturumdaki öğrencilerin ortalama başarı yüzdesini hesapla
-        let totalPercentage = 0;
-
-        roomResults.forEach(result => {
-            // Her öğrencinin score'u zaten 0-100 arası bir yüzde olmalı
-            // Ancak create-test.js veya teacher.js'de hesaplanan score değerine güvenmek yerine
-            // burada tekrar hesaplayabiliriz veya güvenebiliriz.
-            // result.score genellikle 0-100 arası yüzdedir (finish-quiz eventinde hesaplanır)
-
-            // Eğer score tanımlı değilse 0 kabul et
-            let studentScore = result.score || 0;
-
-            // Eğer score 100'den büyükse (ham puan ise), yüzdeye çevir
-            if (studentScore > 100) {
-                const maxScore = test.questions.length * 1000;
-                studentScore = (studentScore / maxScore) * 100;
-            }
-
-            totalPercentage += studentScore;
-        });
-
-        const currentSessionAverage = totalPercentage / roomResults.length;
-
-        // Kümülatif ortalamayı güncelle
-        // Yeni Ortalama = ((Eski Ortalama * Eski Oynatma Sayısı) + Şu Ankı Ortalama) / Yeni Oynatma Sayısı
-        // Ancak bu formül, her oturumda farklı sayıda öğrenci olduğunda tam doğru ağırlıklandırmayı yapmaz.
-        // Daha doğru ağırlıklandırma için "Toplam Öğrenci Sayısı" üzerinden gitmek gerekir ama 
-        // veri yapısını değiştirmemek için "Oda Bazlı Ortalama" üzerinden gidiyoruz.
-
-        if (previousTotalPlays === 0) {
-            test.statistics.averageScore = currentSessionAverage;
-        } else {
-            test.statistics.averageScore = ((previousAverageScore * previousTotalPlays) + currentSessionAverage) / test.statistics.totalPlays;
-        }
-    }
-
-    saveTests(tests);
+    db.recordTestSessionStatistics(testId, roomResults);
 }
 
 // ==================== ODA YÖNETİMİ API ====================
@@ -498,8 +325,7 @@ function updateTestStatistics(testId, roomResults) {
 app.post('/api/create-room-from-test', (req, res) => {
     const { teacherName, testId } = req.body;
 
-    const tests = loadTests();
-    const test = tests.find(t => t.id === testId);
+    const test = db.getTestById(testId);
 
     if (!test) {
         return res.status(404).json({ error: 'Test bulunamadı' });

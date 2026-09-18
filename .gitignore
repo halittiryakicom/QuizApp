@@ -41,6 +41,11 @@ build/
 *.tmp
 tmp/
 
-# Data files (optional - uncomment if you don't want to commit user data)
+# SQLite veritabanı — gerçek kullanıcı şifre hash'leri içerir, commit'e girmez
+data/quizapp.db
+data/quizapp.db-shm
+data/quizapp.db-wal
+
+# Data files (eski JSON depolama — artık SQLite'a taşındı, bkz. database/migrate.js)
 data/users.json
 # data/tests.json

@@ -73,7 +73,7 @@ Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenle
 - **Express.js**: Web framework
 - **Socket.IO**: Gerçek zamanlı çift yönlü iletişim
 - **bcrypt**: Şifre hashleme ve güvenlik
-- **File System (fs)**: JSON dosya tabanlı veri saklama (bkz. [Veritabanı](#-veritabanı) — MSSQL'e geçiş planlanıyor)
+- **better-sqlite3**: Kalıcı veri (kullanıcılar, kategoriler, testler) — bkz. [Veritabanı](#-veritabanı)
 
 ### Frontend
 
@@ -173,19 +173,19 @@ npm start
 ```
 QuizApp/
 │
-├── 📂 data/                      # JSON veri dosyaları (aktif depolama)
-│   ├── questions.json            # Sorular (eski sistem)
-│   ├── tests.json                # Oluşturulan testler
-│   ├── categories.json           # Kategoriler
-│   └── users.json                # Kullanıcı bilgileri (gerçek şifre hash'i içerdiği için .gitignore'da)
+├── 📂 data/
+│   ├── quizapp.db                # SQLite veritabanı — kullanıcılar, kategoriler, testler (.gitignore'da)
+│   ├── questions.json             # Eski soru bankası (kullanılmıyor, referans olarak duruyor)
+│   ├── tests.json                 # Eski test deposu (SQLite'a taşındı, artık okunmuyor)
+│   └── categories.json            # Eski kategori deposu (SQLite'a taşındı, artık okunmuyor)
 │
-├── 📂 database/                  # MSSQL şema + migration (planlanan hedef, henüz server.js'e bağlı değil)
-│   ├── schema.sql                # Tablolar, view'lar, stored procedure'lar
-│   ├── migrate.js                # JSON -> MSSQL migration script'i
-│   └── db-helpers.js             # MSSQL sorgu yardımcıları
+├── 📂 database/                  # SQLite şema + migration
+│   ├── schema.sql                # users / categories / tests tabloları
+│   ├── migrate.js                # JSON -> SQLite migrasyon script'i (idempotent)
+│   └── db-helpers.js             # Veri erişim katmanı (server.js bunu kullanır)
 │
 ├── 📂 config/
-│   └── database.js               # MSSQL bağlantı havuzu (mssql paketi)
+│   └── database.js               # SQLite bağlantısı (better-sqlite3, tek dosya)
 │
 ├── 📂 public/                    # Frontend dosyaları
 │   ├── 📂 css/                   # admin.css, style.css, teacher.css
@@ -198,7 +198,7 @@ QuizApp/
 │
 ├── server.js                     # Express ve Socket.IO server (şu an JSON veri katmanını kullanıyor)
 ├── package.json                  # Proje bağımlılıkları
-├── DATABASE_SETUP.md             # MSSQL kurulum rehberi
+├── DATABASE_SETUP.md             # SQLite kurulum rehberi
 └── readme.md                     # Bu dosya
 ```
 
@@ -382,20 +382,23 @@ Tüm kullanıcıları listele
 
 ## 🗄️ Veritabanı
 
-Uygulama şu an **JSON dosyaları** (`data/*.json`) üzerinden çalışıyor. MSSQL'e geçiş için altyapı hazırlandı ama **server.js henüz bu katmanı kullanmıyor** — bu bilinçli olarak açık bırakılan bir iş:
+Uygulama **SQLite** (`better-sqlite3`) kullanıyor — sıfır kurulum, tek dosya (`data/quizapp.db`). Kullanıcılar, kategoriler ve testler kalıcı olarak burada tutulur; `server.js`'teki tüm ilgili route'lar `database/db-helpers.js` üzerinden bu katmana yazıp okur (eskiden her istekte `data/*.json` dosyasının tamamını okuyup tekrar yazan `fs.readFileSync`/`writeFileSync` çağrıları vardı).
 
-- `database/schema.sql` — 10 tablo (Users, Categories, Questions, QuestionOptions, Tests, TestQuestions, QuizSessions, QuizParticipants, QuizAnswers, QuestionStatistics), 2 view, 2 stored procedure
-- `database/migrate.js` — JSON verisini MSSQL'e aktaran script (`npm run db:setup`)
-- `database/db-helpers.js` — MSSQL sorgu yardımcı fonksiyonları
-- `config/database.js` — `mssql` paketiyle bağlantı havuzu
+Canlı quiz odaları ve katılımcı durumu **bilinçli olarak** veritabanında değil — bunlar gerçek zamanlı, geçici oyun durumu olduğu için `server.js` içinde bellek içi (`Map`) olarak kalmaya devam ediyor. Bir oturum bittiğinde yalnızca özet istatistikler (`tests.totalPlays`, `totalStudents`, `averageScore`) kalıcı hale gelir.
 
-Kurulum adımları için **[DATABASE_SETUP.md](DATABASE_SETUP.md)** dosyasına bakın. `server.js`'in route'larını bu katmana bağlamak — yani gerçek migrasyonu tamamlamak — [Yol Haritası](#-yol-haritası)'nda açık bir madde.
+- `database/schema.sql` — `users`, `categories`, `tests` tabloları
+- `database/db-helpers.js` — veri erişim katmanı
+- `database/migrate.js` — eski `data/*.json` dosyalarındaki kayıtları SQLite'a aktarır (idempotent, `npm run db:setup`)
+- `config/database.js` — bağlantı (tek satır: `new Database('data/quizapp.db')`)
+
+Kurulum adımları için **[DATABASE_SETUP.md](DATABASE_SETUP.md)** dosyasına bakın.
+
+> Daha önce burada MSSQL hedeflenmişti (ayrı sunucu kurulumu, `mssql` paketi) ama `server.js` o katmana hiç bağlanmamıştı. Küçük, tek-sunuculu bir quiz uygulaması için gereksiz bir altyapı yüküydü; SQLite'a geçilerek migrasyon gerçekten tamamlandı.
 
 ---
 
 ## 🗺️ Yol Haritası
 
-- [ ] `server.js` route'larını `database/db-helpers.js` (MSSQL) üzerinden çalışacak şekilde yeniden bağlama — JSON dosyaları hâlâ tek gerçek kaynak
 - [ ] Eşleştirme (`matching`) soru tipi implementasyonu
 - [ ] Resimli soru desteği
 - [ ] Excel'den toplu soru yükleme

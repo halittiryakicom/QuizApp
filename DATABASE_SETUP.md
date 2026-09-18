@@ -1,316 +1,91 @@
-# 🗄️ MSSQL Veritabanı Kurulum Rehberi
+# 🗄️ Veritabanı Kurulum Rehberi
 
-## 📋 Gereksinimler
+Uygulama **SQLite** kullanıyor — ayrı bir veritabanı sunucusu kurmanıza gerek yok. Tüm veri tek bir dosyada tutulur: `data/quizapp.db`.
 
-- **SQL Server** (2017 veya üzeri)
-  - SQL Server Express (Ücretsiz)
-  - SQL Server Developer Edition (Ücretsiz)
-  - Azure SQL Database
-- **Node.js** (v14 veya üzeri)
-- **npm** veya **yarn**
+> **Not:** Bu proje eskiden MSSQL (SQL Server) hedefliyordu — `mssql` npm paketi, ayrı bir sunucu kurulumu, mixed-mode kimlik doğrulama vb. Küçük, tek-sunuculu bir quiz uygulaması için bu gereksiz bir altyapı yüküydü, üstelik `server.js` o katmana hiç bağlanmamıştı. SQLite'a geçildi: sıfır kurulum, tek dosya, `better-sqlite3` ile senkron ve hızlı.
 
 ---
 
-## 🚀 Kurulum Adımları
+## 🚀 Kurulum
 
-### 1. SQL Server Kurulumu
-
-#### Windows Yerel Kurulum
-
-1. **SQL Server Express** indir:
-   - https://www.microsoft.com/sql-server/sql-server-downloads
-   - "Express" versiyonunu seç
-
-2. Kurulum sırasında:
-   - **Mixed Mode Authentication** seçin
-   - `sa` kullanıcısı için güçlü bir şifre belirleyin
-   - SQL Server Browser'ı etkinleştirin
-
-3. **SQL Server Management Studio (SSMS)** indir (Opsiyonel):
-   - https://docs.microsoft.com/sql/ssms/download-sql-server-management-studio-ssms
-
-#### Docker ile Kurulum
-
-```bash
-docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=YourStrongPassword123!" \
-   -p 1433:1433 --name sqlserver \
-   -d mcr.microsoft.com/mssql/server:2022-latest
-```
-
-#### Azure SQL Database
-
-1. Azure Portal'da SQL Database oluşturun
-2. Bağlantı bilgilerini not edin
-3. Firewall'da IP adresinizi ekleyin
-
----
-
-### 2. Proje Bağımlılıklarını Yükle
+### 1. Bağımlılıkları yükle
 
 ```bash
 npm install
 ```
 
-Yeni eklenen paketler:
-- `mssql` - Microsoft SQL Server client
-- `dotenv` - Çevre değişkenleri yönetimi
+### 2. Şemayı oluştur + mevcut JSON verisini aktar
 
----
-
-### 3. Veritabanı Konfigürasyonu
-
-#### `.env` Dosyasını Düzenle
-
-`.env.example` dosyasını `.env` olarak kopyalayın:
+`data/users.json`, `data/categories.json` ve `data/tests.json` içindeki kayıtlar varsa otomatik aktarılır (idempotent — tekrar çalıştırmak güvenlidir):
 
 ```bash
-cp .env.example .env
+npm run db:setup
 ```
 
-`.env` dosyasını düzenleyin:
-
-```env
-# MSSQL Database Configuration
-DB_SERVER=localhost
-DB_PORT=1433
-DB_DATABASE=QuizAppDB
-DB_USER=sa
-DB_PASSWORD=YourStrongPassword123!
-DB_ENCRYPT=true
-DB_TRUST_SERVER_CERTIFICATE=true
-```
-
-**Azure SQL Database için:**
-
-```env
-DB_SERVER=your-server.database.windows.net
-DB_DATABASE=QuizAppDB
-DB_USER=your-username
-DB_PASSWORD=your-password
-DB_ENCRYPT=true
-DB_TRUST_SERVER_CERTIFICATE=false
-```
-
----
-
-### 4. Veritabanını Oluştur
-
-#### Opsiyon A: SSMS ile Manuel Oluşturma
-
-1. SQL Server Management Studio'yu açın
-2. Sunucuya bağlanın
-3. Yeni sorgu açın ve çalıştırın:
-
-```sql
-CREATE DATABASE QuizAppDB;
-GO
-```
-
-#### Opsiyon B: Komut Satırından
+Alternatif komutlar:
 
 ```bash
-# sqlcmd yüklü ise (SQL Server Tools)
-sqlcmd -S localhost -U sa -P YourStrongPassword123! -Q "CREATE DATABASE QuizAppDB"
+npm run db:schema    # yalnızca tabloları oluştur
+npm run db:migrate   # yalnızca JSON -> SQLite veri aktarımı
+npm run db:test      # bağlantıyı doğrula
 ```
 
----
-
-### 5. Tam Kurulum (Schema + Migration)
-
-Tüm tabloları oluşturup JSON verilerini aktarın:
+### 3. Uygulamayı başlat
 
 ```bash
-node database/migrate.js full
+npm start
+# veya geliştirme modu:
+npm run dev
 ```
 
-Bu komut:
-- ✅ Tüm tabloları oluşturur
-- ✅ View'ları ve stored procedure'ları ekler
-- ✅ JSON dosyalarındaki kategorileri aktarır
-- ✅ JSON dosyalarındaki soruları aktarır
-- ✅ JSON dosyalarındaki testleri aktarır
-
----
-
-## 🔧 Alternatif Kurulum Komutları
-
-### Sadece Schema Oluştur
-
-```bash
-node database/migrate.js schema
-```
-
-### Sadece Veri Migration
-
-```bash
-node database/migrate.js migrate
-```
+İlk istekte şema zaten yoksa otomatik oluşturulur (`database/db-helpers.js` içindeki `ensureSchema()`), yani `db:setup` adımını atlarsanız bile uygulama çalışır — sadece eski JSON verileriniz varsa onları elle aktarmanız gerekir (`npm run db:migrate`).
 
 ---
 
 ## 📊 Veritabanı Yapısı
 
-### Tablolar
+`database/schema.sql` üç tablo tanımlar — server.js'in gerçekten kalıcı olarak sakladığı üç varlık:
 
-1. **Users** - Kullanıcılar (öğrenci, öğretmen, admin)
-2. **Categories** - Soru kategorileri
-3. **Questions** - Sorular
-4. **QuestionOptions** - Soru seçenekleri
-5. **Tests** - Testler
-6. **TestQuestions** - Test-Soru ilişkisi
-7. **QuizSessions** - Quiz oturumları (odalar)
-8. **QuizParticipants** - Katılımcılar
-9. **QuizAnswers** - Verilen cevaplar
-10. **QuestionStatistics** - Soru istatistikleri
+| Tablo | İçerik |
+|---|---|
+| `users` | Öğretmen hesapları (id, fullName, username, password hash, role, token, createdAt, lastLogin) |
+| `categories` | Test kategorileri (id, name, createdAt, updatedAt) |
+| `tests` | Testler — sorular `questions` sütununda JSON metni olarak gömülü (eski `tests.json`'daki gibi) |
 
-### View'lar
-
-- `vw_TestStatistics` - Test istatistikleri özeti
-- `vw_UserPerformance` - Kullanıcı performans özeti
-
-### Stored Procedures
-
-- `sp_UpdateTestStatistics` - Test istatistiklerini günceller
-- `sp_UpdateQuestionStatistics` - Soru istatistiklerini günceller
-
----
-
-## 🧪 Veritabanı Bağlantısını Test Et
-
-```bash
-node -e "require('./config/database').testConnection()"
-```
-
-Beklenen çıktı:
-```
-✅ MSSQL veritabanı bağlantı havuzu oluşturuldu
-✅ MSSQL Bağlantı Testi Başarılı
-📊 SQL Server Version: Microsoft SQL Server 2022...
-```
-
----
-
-## 🏃 Uygulamayı Başlat
-
-```bash
-npm start
-```
-
-veya geliştirme modu için:
-
-```bash
-npm run dev
-```
-
----
-
-## 📝 Örnek Veri Ekleme
-
-Schema içinde bazı örnek veriler otomatik eklenir:
-- Admin kullanıcısı (username: admin, email: admin@quizapp.com)
-- 8 kategori (Genel Kültür, Bilim, Tarih, vb.)
-
-Migration çalıştığında mevcut JSON dosyalarındaki tüm veriler aktarılır.
+**Bilinçli olarak burada olmayan:** canlı quiz odaları / katılımcı durumu. Bunlar gerçek zamanlı, geçici oyun durumu olduğu için `server.js` içinde bellek içi (`Map`) olarak kalıyor — her socket olayını veritabanına yazmak gereksiz yazma yükü getirir. Bir test bittiğinde yalnızca özet istatistikler (`tests.totalPlays`, `totalStudents`, `averageScore`) kalıcı hale gelir.
 
 ---
 
 ## 🔍 Veritabanını İnceleme
 
-### SSMS ile
+SQLite CLI'niz varsa:
 
-1. Object Explorer'da `QuizAppDB` veritabanını genişlet
-2. Tables altında tabloları görüntüle
-3. Sağ tık -> "Select Top 1000 Rows"
+```bash
+sqlite3 data/quizapp.db "SELECT username, role FROM users;"
+sqlite3 data/quizapp.db "SELECT title, playCount, averageScore FROM tests;"
+```
 
-### Sorgu ile
+Ya da Node ile:
 
-```sql
--- Kategori sayısı
-SELECT COUNT(*) as TotalCategories FROM Categories;
+```bash
+node -e "const {getDb}=require('./config/database'); console.log(getDb().prepare('SELECT * FROM tests').all());"
+```
 
--- Soru sayısı
-SELECT COUNT(*) as TotalQuestions FROM Questions;
+---
 
--- Test sayısı
-SELECT COUNT(*) as TotalTests FROM Tests;
+## ⚙️ Konfigürasyon
 
--- Test istatistikleri
-SELECT * FROM vw_TestStatistics;
+`.env` dosyasında (opsiyonel, `.env.example`'ı kopyalayın):
 
--- Kullanıcı performansı
-SELECT * FROM vw_UserPerformance;
+```env
+PORT=3000
+NODE_ENV=development
+# DB_PATH=./data/quizapp.db   # varsayılan zaten bu
 ```
 
 ---
 
 ## 🔐 Güvenlik Notları
 
-1. **Şifreleri güvenli tutun**
-   - `.env` dosyası `.gitignore`'a eklenmiştir
-   - Production'da güçlü şifreler kullanın
-
-2. **Firewall ayarları**
-   - SQL Server sadece gerekli IP'lere açık olmalı
-   - Azure'da IP whitelist kullanın
-
-3. **SSL/TLS**
-   - Production'da `DB_ENCRYPT=true` kullanın
-   - Yerel geliştirmede `DB_TRUST_SERVER_CERTIFICATE=true` olabilir
-
----
-
-## 🐛 Sorun Giderme
-
-### Bağlantı Hatası: "Login failed"
-
-- SQL Server Mixed Mode Authentication etkin mi?
-- `sa` kullanıcısı aktif mi?
-- Şifre doğru mu?
-
-```sql
--- SQL Server'da çalıştır
-ALTER LOGIN sa ENABLE;
-GO
-ALTER LOGIN sa WITH PASSWORD = 'YourNewPassword123!';
-GO
-```
-
-### Bağlantı Hatası: "Server not found"
-
-- SQL Server Browser servisi çalışıyor mu?
-- TCP/IP protokolü etkin mi?
-- Port 1433 açık mı?
-
-```bash
-# Windows Services'de kontrol et
-services.msc
-# SQL Server Browser servisini başlat
-```
-
-### Migration Hatası: "Database does not exist"
-
-Önce veritabanını oluşturun:
-
-```bash
-node -e "require('mssql').connect(require('./config/database').config).then(pool => pool.request().query('CREATE DATABASE QuizAppDB')).then(() => console.log('Veritabanı oluşturuldu')).catch(console.error)"
-```
-
----
-
-## 📚 Kaynaklar
-
-- [MSSQL Node.js Driver](https://github.com/tediousjs/node-mssql)
-- [SQL Server Express Download](https://www.microsoft.com/sql-server/sql-server-downloads)
-- [Azure SQL Database](https://azure.microsoft.com/services/sql-database/)
-- [SQL Server Configuration Manager](https://docs.microsoft.com/sql/relational-databases/sql-server-configuration-manager)
-
----
-
-## ✅ Sonraki Adımlar
-
-1. ✅ Veritabanı kurulumu tamamlandı
-2. 🔄 `server.js`'i MSSQL kullanacak şekilde güncelleyin
-3. 🧪 API endpoint'lerini test edin
-4. 🌐 Uygulamayı başlatın
-
-**Migration başarılı olduysa artık JSON dosyaları yerine MSSQL kullanılıyor! 🎉**
+- `data/quizapp.db` gerçek kullanıcı şifre hash'leri içerir — `.gitignore`'da, asla commit edilmez.
+- Eski `data/users.json` de aynı sebeple `.gitignore`'dadır; `data/tests.json`/`categories.json` içerik olarak hassas değildir ama artık kullanılmıyor (referans/yedek olarak kalabilir).
