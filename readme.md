@@ -1,6 +1,6 @@
 # 🎓 Quiz App - İnteraktif Quiz Uygulaması
 
-Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenler test oluşturabilir, öğrenciler canlı olarak testlere katılabilir ve sonuçları anlık olarak takip edebilir.
+Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenler test oluşturabilir, öğrenciler davet kodu ile aynı anda sınava girebilir ve sonuçlarını anlık olarak takip edebilir.
 
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
 ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
@@ -18,8 +18,8 @@ Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenle
 - [Proje Yapısı](#-proje-yapısı)
 - [API Endpoints](#-api-endpoints)
 - [Socket.IO Olayları](#-socketio-olayları)
-- [Ekran Görüntüleri](#-ekran-görüntüleri)
-- [Katkıda Bulunma](#-katkıda-bulunma)
+- [Veritabanı](#-veritabanı)
+- [Yol Haritası](#-yol-haritası)
 - [Lisans](#-lisans)
 - [İletişim](#-iletişim-ve-linkler)
 
@@ -30,38 +30,38 @@ Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenle
 ### 🎯 Genel Özellikler
 
 - ✅ **Gerçek Zamanlı İletişim**: Socket.IO ile canlı sınav deneyimi
-- ✅ **Kullanıcı Yönetimi**: Öğretmen kaydı ve giriş sistemi (bcrypt ile şifreli)
-- ✅ **Oda Sistemi**: Benzersiz oda kodları ile öğrenci katılımı
-- ✅ **Responsive Tasarım**: Mobil, tablet ve desktop uyumlu arayüz
+- ✅ **Kullanıcı Yönetimi**: Öğretmen kaydı ve girişi (bcrypt ile şifreli)
+- ✅ **Oda Sistemi**: 5 haneli davet kodu ile öğrenci katılımı, tüm öğrenciler aynı anda başlar
+- ✅ **Responsive Tasarım**: Mobil, tablet ve masaüstü uyumlu arayüz
 - ✅ **Otomatik Puanlama**: Anlık puan hesaplama ve sıralama
 
 ### 👨‍🏫 Öğretmen Özellikleri
 
-- 📝 **Test Oluşturma**: 4 farklı soru tipi desteği
-  - Çoktan Seçmeli
-  - Doğru/Yanlış
-  - Boşluk Doldurma
-  - Eşleştirme (yakında)
-- 🎨 **Özelleştirilebilir Testler**: Soru başına süre ayarlama
-- 📊 **Canlı İzleme**: Öğrenci katılımını ve cevapları gerçek zamanlı görüntüleme
-- 🏆 **Liderlik Tablosu Kontrolü**: Sıralamayı istediğiniz zaman gösterme
-- 📈 **Detaylı Raporlar**: Test sonuçları ve öğrenci performans analizi
+- 📝 **Test Oluşturma**: `/create-test` sayfasında 4 soru tipi desteği
+  - Çoktan Seçmeli (`multiple`)
+  - Doğru/Yanlış (`truefalse`)
+  - Boşluk Doldurma (`fillblank`) — birden fazla kabul edilen cevap tanımlanabilir, büyük/küçük harf duyarsız
+  - Eşleştirme (`matching`) — geliştirme aşamasında
+- 🎨 **Özelleştirilebilir Testler**: Başlık, kategori, açıklama, soru başına süre
+- 🚪 **Oda Açma**: Kayıtlı bir testten tek tıkla oda açıp davet kodu üretme
+- 📊 **Öğretmen Kontrolünde İlerleme**: Her sorudan sonra "Sonraki Soru" ile devam edilir — öğrenciler cevaplasa bile süre öğretmenin elinde
+- 🏆 **Liderlik Tablosu Kontrolü**: Her soru arası 5 saniye ilk 10, madalyalı (🥇🥈🥉) liderlik tablosu
+- 📈 **Test İstatistikleri**: Kaç kez oynatıldı, kaç öğrenci çözdü, ortalama başarı
 - 🔐 **Güvenli Giriş**: Token tabanlı kimlik doğrulama
 
 ### 👨‍🎓 Öğrenci Özellikleri
 
-- 🚀 **Kolay Katılım**: 5 haneli oda kodu ile hızlı bağlanma
+- 🚀 **Kolay Katılım**: Ana sayfadan isim + 5 haneli oda koduyla hızlı bağlanma
 - ⏱️ **Zamanlayıcı**: Her soru için görsel geri sayım
 - 🎯 **Çeşitli Soru Tipleri**: Farklı formatlarda soruları yanıtlama
-- 🏅 **Anlık Sonuçlar**: Quiz bitiminde detaylı performans görüntüleme
-- 📊 **Liderlik Tablosu**: Sıralamada yerinizi görme
+- 🏅 **Anlık Sonuçlar**: Her sorudan sonra kendi sırasını gösteren liderlik tablosu, quiz bitiminde detaylı performans
 - 💡 **Kullanıcı Dostu Arayüz**: Sade ve anlaşılır tasarım
 
 ### 🔧 Admin Özellikleri
 
-- 👥 **Kullanıcı Yönetimi**: Öğretmen hesaplarını yönetme
-- 🔑 **Şifre Sıfırlama**: Admin panelinden şifre değiştirme
-- 📋 **Test Yönetimi**: Tüm testleri görüntüleme ve düzenleme
+- 👥 **Kullanıcı Yönetimi**: Öğretmen hesaplarını yönetme, şifre sıfırlama
+- 📋 **Test Yönetimi**: Tüm testleri görüntüleme, silme
+- 📊 **Genel İstatistikler**: Toplam test/oynatma/öğrenci sayısı ve genel ortalama başarı
 
 ---
 
@@ -73,12 +73,11 @@ Modern, gerçek zamanlı ve kullanıcı dostu bir quiz uygulaması. Öğretmenle
 - **Express.js**: Web framework
 - **Socket.IO**: Gerçek zamanlı çift yönlü iletişim
 - **bcrypt**: Şifre hashleme ve güvenlik
-- **File System (fs)**: JSON dosya tabanlı veri saklama
+- **File System (fs)**: JSON dosya tabanlı veri saklama (bkz. [Veritabanı](#-veritabanı) — MSSQL'e geçiş planlanıyor)
 
 ### Frontend
 
-- **HTML5**: Semantic markup
-- **CSS3**: Modern styling
+- **HTML5 / CSS3**: Semantic markup, modern styling
 - **Bootstrap 5**: Responsive UI framework
 - **Font Awesome**: İkon seti
 - **Vanilla JavaScript**: Client-side logic
@@ -124,9 +123,9 @@ npm start
 
 4. **Tarayıcıda açın**
 
-```
-http://localhost:3000
-```
+- Öğrenci sayfası: http://localhost:3000/
+- Öğretmen paneli: http://localhost:3000/teacher
+- Admin paneli: http://localhost:3000/admin
 
 ---
 
@@ -143,39 +142,29 @@ http://localhost:3000
 #### 2. Test Oluşturma
 
 - `/create-test` sayfasına gidin
-- Test bilgilerini doldurun:
-  - Başlık
-  - Açıklama
-  - Kategori
-  - Soru başına süre (saniye)
-- Soru ekle menüsünden soru tipi seçin
-- Soruları ekleyin ve kaydedin
+- Test bilgilerini doldurun: başlık, açıklama, kategori, soru başına süre
+- Soru Ekle menüsünden soru tipi seçip soruları ekleyin ve kaydedin
 
 #### 3. Oda Açma ve Quiz Başlatma
 
-- `/teacher` paneline gidin
-- Bir test seçin
-- "Oda Aç" butonuna tıklayın
-- 5 haneli oda kodunu öğrencilerle paylaşın
-- Öğrenciler katıldıkça listeyi görün
-- "Quizi Başlat" butonuna tıklayın
-- Soruları ilerletin ve liderlik tablosunu gösterin
+- `/teacher` paneline gidin, bir test seçin
+- "Oda Aç" ile 5 haneli davet kodu üretin ve öğrencilerle paylaşın
+- Öğrenciler katıldıkça listeyi görün, "Testi Başlat"a basın
+- TÜM öğrenciler aynı anda ilk soruyu görür
+- Her cevaplama turundan sonra "Sonraki Soru"ya basarak ilerleyin — arada 5 saniyelik liderlik tablosu otomatik gösterilir
 
 ### Öğrenci İşlemleri
 
 #### 1. Odaya Katılma
 
-- Ana sayfaya (`/`) gidin
-- Adınızı girin
-- Öğretmenin verdiği 5 haneli kodu girin
-- "Odaya Katıl" butonuna tıklayın
+- Ana sayfaya (`/`) gidin, adınızı ve öğretmenin verdiği 5 haneli kodu girin
+- "Odaya Katıl"a tıklayıp bekleme ekranında öğretmeni bekleyin
 
 #### 2. Quiz'e Katılma
 
-- Öğretmen quizi başlatana kadar bekleyin
-- Sorular geldiğinde cevaplarınızı işaretleyin
-- Zamanlayıcıya dikkat edin
-- Quiz bitiminde sonuçlarınızı görün
+- Sorular geldiğinde cevabınızı işaretleyin, zamanlayıcıya dikkat edin
+- Her sorudan sonra kendi sıranızı liderlik tablosunda görün
+- Quiz bitiminde detaylı sonucunuzu görün
 
 ---
 
@@ -184,35 +173,33 @@ http://localhost:3000
 ```
 QuizApp/
 │
-├── 📂 data/                      # JSON veri dosyaları
+├── 📂 data/                      # JSON veri dosyaları (aktif depolama)
 │   ├── questions.json            # Sorular (eski sistem)
 │   ├── tests.json                # Oluşturulan testler
-│   └── users.json                # Kullanıcı bilgileri
+│   ├── categories.json           # Kategoriler
+│   └── users.json                # Kullanıcı bilgileri (gerçek şifre hash'i içerdiği için .gitignore'da)
+│
+├── 📂 database/                  # MSSQL şema + migration (planlanan hedef, henüz server.js'e bağlı değil)
+│   ├── schema.sql                # Tablolar, view'lar, stored procedure'lar
+│   ├── migrate.js                # JSON -> MSSQL migration script'i
+│   └── db-helpers.js             # MSSQL sorgu yardımcıları
+│
+├── 📂 config/
+│   └── database.js               # MSSQL bağlantı havuzu (mssql paketi)
 │
 ├── 📂 public/                    # Frontend dosyaları
-│   ├── 📂 css/                   # Stil dosyaları
-│   │   ├── admin.css
-│   │   ├── style.css
-│   │   └── teacher.css
-│   │
-│   ├── 📂 js/                    # JavaScript dosyaları
-│   │   ├── admin.js              # Admin paneli logic
-│   │   ├── create-test.js        # Test oluşturma logic
-│   │   ├── login.js              # Giriş/Kayıt logic
-│   │   ├── student.js            # Öğrenci logic
-│   │   ├── teacher.js            # Öğretmen paneli logic
-│   │   ├── quiz.js               # Quiz engine
-│   │   └── ui.js                 # UI yardımcıları
-│   │
+│   ├── 📂 css/                   # admin.css, style.css, teacher.css
+│   ├── 📂 js/                    # admin.js, create-test.js, login.js, student.js, teacher.js, quiz.js, ui.js
 │   ├── admin.html                # Admin paneli
-│   ├── create-test.js            # Test oluşturma sayfası
+│   ├── create-test.html          # Test oluşturma sayfası
 │   ├── index.html                # Öğrenci ana sayfası
 │   ├── login.html                # Giriş/Kayıt sayfası
 │   └── teacher.html              # Öğretmen paneli
 │
-├── server.js                     # Express ve Socket.IO server
+├── server.js                     # Express ve Socket.IO server (şu an JSON veri katmanını kullanıyor)
 ├── package.json                  # Proje bağımlılıkları
-└── README.md                     # Proje dokümantasyonu
+├── DATABASE_SETUP.md             # MSSQL kurulum rehberi
+└── readme.md                     # Bu dosya
 ```
 
 ---
@@ -290,11 +277,7 @@ Yeni öğretmen kaydı
 
 Tüm testleri listele
 
-**Headers:**
-
-```
-Authorization: token_xxx
-```
+**Headers:** `Authorization: token_xxx`
 
 **Response:**
 
@@ -317,11 +300,7 @@ Authorization: token_xxx
 
 Yeni test oluştur
 
-**Headers:**
-
-```
-Authorization: token_xxx
-```
+**Headers:** `Authorization: token_xxx`
 
 **Request Body:**
 
@@ -346,11 +325,7 @@ Authorization: token_xxx
 
 Test sil
 
-**Headers:**
-
-```
-Authorization: token_xxx
-```
+**Headers:** `Authorization: token_xxx`
 
 ### Admin Endpoints
 
@@ -378,72 +353,54 @@ Tüm kullanıcıları listele
 
 ### Öğrenci Olayları
 
-| Olay                  | Yön             | Açıklama             | Veri                                       |
-| --------------------- | --------------- | -------------------- | ------------------------------------------ |
-| `join-room`           | Client → Server | Odaya katılma isteği | `{ roomCode, studentName }`                |
-| `student-joined`      | Server → Client | Katılım başarılı     | `{ roomId, studentId, students }`          |
-| `join-error`          | Server → Client | Katılım hatası       | `{ message }`                              |
-| `submit-answer`       | Client → Server | Cevap gönderme       | `{ roomId, studentId, answer, timeTaken }` |
-| `quiz-started`        | Server → Client | Quiz başladı         | `{ totalQuestions, currentQuestion }`      |
-| `next-question-ready` | Server → Client | Yeni soru hazır      | `{ question, timeLimit }`                  |
-| `question-time-up`    | Server → Client | Süre doldu           | `{ correctAnswer }`                        |
-| `show-leaderboard`    | Server → Client | Liderlik tablosu     | `{ leaderboard }`                          |
-| `quiz-ended`          | Server → Client | Quiz bitti           | `{ finalResults }`                         |
+| Olay                   | Yön              | Açıklama              | Veri                                       |
+| ---------------------- | ---------------- | ---------------------- | ------------------------------------------- |
+| `join-room`            | Client → Server  | Odaya katılma isteği  | `{ roomCode, studentName }`                |
+| `student-joined`       | Server → Client  | Katılım başarılı      | `{ roomId, studentId, students }`          |
+| `join-error`           | Server → Client  | Katılım hatası        | `{ message }`                              |
+| `submit-answer`        | Client → Server  | Cevap gönderme        | `{ roomId, studentId, answer, timeTaken }` |
+| `quiz-started`         | Server → Client  | Quiz başladı          | `{ totalQuestions, currentQuestion }`      |
+| `next-question-ready`  | Server → Client  | Yeni soru hazır       | `{ question, timeLimit }`                  |
+| `question-time-up`     | Server → Client  | Süre doldu            | `{ correctAnswer }`                        |
+| `show-leaderboard`     | Server → Client  | Liderlik tablosu      | `{ leaderboard }`                          |
+| `quiz-ended`           | Server → Client  | Quiz bitti            | `{ finalResults }`                         |
 
 ### Öğretmen Olayları
 
-| Olay                    | Yön             | Açıklama                    | Veri                    |
-| ----------------------- | --------------- | --------------------------- | ----------------------- |
-| `create-room`           | Client → Server | Oda oluştur                 | `{ testId, teacherId }` |
-| `room-created`          | Server → Client | Oda oluşturuldu             | `{ roomCode, roomId }`  |
-| `start-quiz`            | Client → Server | Quizi başlat                | `{ roomId }`            |
-| `next-question`         | Client → Server | Sonraki soru                | `{ roomId }`            |
-| `show-leaderboard`      | Client → Server | Liderlik tablosu göster     | `{ roomId }`            |
-| `end-quiz`              | Client → Server | Quizi bitir                 | `{ roomId }`            |
-| `student-list-updated`  | Server → Client | Öğrenci listesi güncellendi | `{ students }`          |
-| `all-students-answered` | Server → Client | Tüm öğrenciler cevapladı    | `{ stats }`             |
+| Olay                     | Yön              | Açıklama                     | Veri                    |
+| ------------------------ | ---------------- | ------------------------------ | ------------------------ |
+| `create-room`            | Client → Server  | Oda oluştur                   | `{ testId, teacherId }` |
+| `room-created`           | Server → Client  | Oda oluşturuldu               | `{ roomCode, roomId }`  |
+| `start-quiz`             | Client → Server  | Quizi başlat                  | `{ roomId }`             |
+| `next-question`          | Client → Server  | Sonraki soru                  | `{ roomId }`             |
+| `show-leaderboard`       | Client → Server  | Liderlik tablosu göster       | `{ roomId }`             |
+| `end-quiz`               | Client → Server  | Quizi bitir                   | `{ roomId }`             |
+| `student-list-updated`   | Server → Client  | Öğrenci listesi güncellendi   | `{ students }`           |
+| `all-students-answered`  | Server → Client  | Tüm öğrenciler cevapladı      | `{ stats }`              |
 
 ---
 
-## 📸 Ekran Görüntüleri
+## 🗄️ Veritabanı
 
-### Öğrenci Arayüzü
+Uygulama şu an **JSON dosyaları** (`data/*.json`) üzerinden çalışıyor. MSSQL'e geçiş için altyapı hazırlandı ama **server.js henüz bu katmanı kullanmıyor** — bu bilinçli olarak açık bırakılan bir iş:
 
-- Oda katılım ekranı
-- Quiz ekranı
-- Liderlik tablosu
+- `database/schema.sql` — 10 tablo (Users, Categories, Questions, QuestionOptions, Tests, TestQuestions, QuizSessions, QuizParticipants, QuizAnswers, QuestionStatistics), 2 view, 2 stored procedure
+- `database/migrate.js` — JSON verisini MSSQL'e aktaran script (`npm run db:setup`)
+- `database/db-helpers.js` — MSSQL sorgu yardımcı fonksiyonları
+- `config/database.js` — `mssql` paketiyle bağlantı havuzu
 
-### Öğretmen Paneli
-
-- Test listesi
-- Oda yönetimi
-- Canlı izleme ekranı
-
-### Test Oluşturma
-
-- Soru ekleme arayüzü
-- Farklı soru tipleri
+Kurulum adımları için **[DATABASE_SETUP.md](DATABASE_SETUP.md)** dosyasına bakın. `server.js`'in route'larını bu katmana bağlamak — yani gerçek migrasyonu tamamlamak — [Yol Haritası](#-yol-haritası)'nda açık bir madde.
 
 ---
 
-## 🤝 Katkıda Bulunma
+## 🗺️ Yol Haritası
 
-Katkılarınızı bekliyoruz! Lütfen aşağıdaki adımları izleyin:
-
-1. Bu repository'yi fork edin
-2. Feature branch'i oluşturun (`git checkout -b feature/AmazingFeature`)
-3. Değişikliklerinizi commit edin (`git commit -m 'feat: Add some AmazingFeature'`)
-4. Branch'inizi push edin (`git push origin feature/AmazingFeature`)
-5. Pull Request oluşturun
-
-### Geliştirme Yol Haritası
-
-- [ ] Eşleştirme soru tipi implementasyonu
+- [ ] `server.js` route'larını `database/db-helpers.js` (MSSQL) üzerinden çalışacak şekilde yeniden bağlama — JSON dosyaları hâlâ tek gerçek kaynak
+- [ ] Eşleştirme (`matching`) soru tipi implementasyonu
 - [ ] Resimli soru desteği
 - [ ] Excel'den toplu soru yükleme
 - [ ] Detaylı analytics ve raporlama
-- [ ] MongoDB entegrasyonu
-- [ ] JWT authentication
+- [ ] JWT authentication (şu an özel token üretimi kullanılıyor)
 - [ ] Email bildirimleri
 - [ ] Öğrenci hesapları ve geçmiş
 - [ ] Özel tema desteği
@@ -457,8 +414,6 @@ Bu proje MIT lisansı altında lisanslanmıştır. Detaylar için [LICENSE](LICE
 ---
 
 ## 🔗 İletişim ve Linkler
-
-Aşağıdaki kanallar üzerinden bana ulaşabilirsiniz:
 
 - 🌐 **Web Sitesi**: [https://www.halittiryaki.com/](https://www.halittiryaki.com/)
 - 🐦 **X (Twitter)**: [@halittiryakicom](https://x.com/halittiryakicom)
